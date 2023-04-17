@@ -29,16 +29,16 @@ import UIKit
 
 class NoFileSelectedViewController: UIViewController {
 
-    required init(coder aDecoder: NSCoder) {
+    required init?(coder aDecoder: NSCoder) {
         super.init(coder: aDecoder)
     }
 
-    override init(nibName nibNameOrNil: String!, bundle nibBundleOrNil: NSBundle!) {
+    override init(nibName nibNameOrNil: String?, bundle nibBundleOrNil: Bundle?) {
         super.init(nibName: nibNameOrNil, bundle: nibBundleOrNil)
     }
 
-    internal convenience override init() {
-        self.init(nibName: "NoFileSelectedViewController", bundle: NSBundle(forClass: NoFileSelectedViewController.self))
+    internal convenience init() {
+        self.init(nibName: "NoFileSelectedViewController", bundle: Bundle(for: NoFileSelectedViewController.self))
         title = "No file selected"
     }
 

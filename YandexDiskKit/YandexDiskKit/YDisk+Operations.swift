@@ -31,7 +31,7 @@ extension YandexDisk {
 
     public enum OperationsResult {
         case Status(String)
-        case Failed(NSError!)
+        case Failed(Error)
     }
 
     /// Operation status.
@@ -45,7 +45,7 @@ extension YandexDisk {
     /// API reference:
     ///   `english http://api.yandex.com/disk/api/reference/operations.xml`_,
     ///   `russian https://tech.yandex.ru/disk/api/reference/operations-docpage/`_.
-    public func operationStatusWithId(opId:String, handler:((result:OperationsResult) -> Void)? = nil) -> Result<OperationsResult> {
+    public func operationStatusWithId(_ opId:String, handler:((OperationsResult) -> Void)? = nil) -> Result<OperationsResult> {
         var requestUrl = "\(baseURL)/v1/disk/operations/\(opId)"
         return operationStatusWithHref(requestUrl, handler: handler)
     }
@@ -61,7 +61,7 @@ extension YandexDisk {
     /// API reference:
     ///   `english http://api.yandex.com/disk/api/reference/operations.xml`_,
     ///   `russian https://tech.yandex.ru/disk/api/reference/operations-docpage/`_.
-    public func operationStatusWithHref(href:String, handler:((result:OperationsResult) -> Void)? = nil) -> Result<OperationsResult> {
+    public func operationStatusWithHref(_ href:String, handler:((OperationsResult) -> Void)? = nil) -> Result<OperationsResult> {
         let result = Result<OperationsResult>(handler: handler)
 
         let error = { result.set(.Failed($0)) }

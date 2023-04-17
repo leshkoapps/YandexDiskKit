@@ -32,7 +32,7 @@ extension YandexDisk {
     public enum DeletionResult {
         case Done
         case InProcess(href:String, method:String, templated:Bool)
-        case Failed(NSError!)
+        case Failed(Error)
     }
 
     /// Empties the trash.
@@ -43,7 +43,7 @@ extension YandexDisk {
     /// API reference resources:
     ///   `english http://api.yandex.com/disk/api/reference/trash-delete.xml`_,
     ///   `russian https://tech.yandex.ru/disk/api/reference/trash-delete-docpage/`_.
-    public func emptyTrash(handler:((result:DeletionResult) -> Void)? = nil) -> Result<DeletionResult> {
+    public func emptyTrash(handler:((DeletionResult) -> Void)? = nil) -> Result<DeletionResult> {
         return deletePath(.Trash(""), handler: handler)
     }
 
@@ -62,7 +62,7 @@ extension YandexDisk {
     /// API reference for trashed resources:
     ///   `english http://api.yandex.com/disk/api/reference/trash-delete.xml`_,
     ///   `russian https://tech.yandex.ru/disk/api/reference/trash-delete-docpage/`_.
-    public func deletePath(path:Path, permanently:Bool?=nil, handler:((result:DeletionResult) -> Void)? = nil) -> Result<DeletionResult> {
+    public func deletePath(_ path:Path, permanently:Bool?=nil, handler:((DeletionResult) -> Void)? = nil) -> Result<DeletionResult> {
         let result = Result<DeletionResult>(handler: handler)
 
         var url : String
@@ -85,7 +85,8 @@ extension YandexDisk {
 
             switch response.statusCode {
             case 202:
-                return result.set(.InProcess(YandexDisk.hrefMethodTemplatedWithDictionary(jsonRoot)))
+                let (href, method, templated) = YandexDisk.hrefMethodTemplatedWithDictionary(jsonRoot);
+                return result.set(.InProcess(href: href, method: method, templated: templated));
 
             case 204:
                 return result.set(.Done)

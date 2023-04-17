@@ -25,7 +25,7 @@
 //  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 
-#import <UIKit/UIKit.h>
+@import Foundation;
 
 //! Project version number for YandexDiskKit.
 FOUNDATION_EXPORT double YandexDiskKitVersionNumber;

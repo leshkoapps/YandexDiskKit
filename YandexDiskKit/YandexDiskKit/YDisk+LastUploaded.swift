@@ -31,10 +31,10 @@ extension YandexDisk {
 
     public enum LastUploadedResult {
         case Listing(limit:Int, items:[YandexDiskResource] )
-        case Failed(NSError!)
+        case Failed(Error)
     }
 
-    public enum MediaType : String, Printable {
+    public enum MediaType : String, CustomStringConvertible {
         case Audio = "audio"
         case Backup = "backup"
         case Book = "book"
@@ -73,7 +73,7 @@ extension YandexDisk {
     /// API reference:
     ///   `english http://api.yandex.com/disk/api/reference/recent-upload.xml`_,
     ///   `russian https://tech.yandex.ru/disk/api/reference/recent-upload-docpage/`_.
-    public func lastUploaded(limit:Int? = nil, type:MediaType? = nil, preview_size:PreviewSize?=nil, preview_crop:Bool?=nil, handler:((listing:LastUploadedResult) -> Void)? = nil) -> Result<LastUploadedResult> {
+    public func lastUploaded(_ limit:Int? = nil, type:MediaType? = nil, preview_size:PreviewSize?=nil, preview_crop:Bool?=nil, handler:((LastUploadedResult) -> Void)? = nil) -> Result<LastUploadedResult> {
         let result = Result<LastUploadedResult>(handler: handler)
 
         var url = "\(baseURL)/v1/disk/resources/last-uploaded"
@@ -91,7 +91,7 @@ extension YandexDisk {
             switch response.statusCode {
             case 200:
 
-                let limit = (jsonRoot["limit"] as? NSNumber)?.integerValue ?? 0
+                let limit = (jsonRoot["limit"] as? NSNumber)?.intValue ?? 0
                 if let elements = SimpleResource.resourcesFromArray(jsonRoot["items"] as? NSArray) {
                     return result.set(.Listing(limit: limit, items: elements))
                 }

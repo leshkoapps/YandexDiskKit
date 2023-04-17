@@ -32,7 +32,7 @@ extension YandexDisk {
     public enum ListingResult {
         case File(YandexDiskResource)
         case Listing(dir:YandexDiskResource, limit:Int, offset:Int, total:Int, path:Path, sort:SortKey?, items:[YandexDiskResource] )
-        case Failed(NSError!)
+        case Failed(Error)
     }
 
     /// List metainfo for file or folder.
@@ -49,7 +49,7 @@ extension YandexDisk {
     /// API reference:
     ///   `english http://api.yandex.com/disk/api/reference/meta.xml`_,
     ///   `russian https://tech.yandex.ru/disk/api/reference/meta-docpage/`_.
-    public func listPath(path:Path, sort:SortKey?=nil, limit:Int?=nil, offset:Int?=nil, preview_size:PreviewSize?=nil, preview_crop:Bool?=nil, handler:((listing:ListingResult) -> Void)? = nil) -> Result<ListingResult> {
+    public func listPath(_ path:Path, sort:SortKey?=nil, limit:Int?=nil, offset:Int?=nil, preview_size:PreviewSize?=nil, preview_crop:Bool?=nil, handler:((ListingResult) -> Void)? = nil) -> Result<ListingResult> {
 
         var url : String
 
@@ -69,7 +69,7 @@ extension YandexDisk {
         return _listURL(url, handler:handler)
     }
 
-    func _listURL(url:String, handler:((listing:ListingResult) -> Void)? = nil) -> Result<ListingResult> {
+    func _listURL(_ url:String, handler:((ListingResult) -> Void)? = nil) -> Result<ListingResult> {
         let result = Result<ListingResult>(handler: handler)
 
         let error = { result.set(.Failed($0)) }
@@ -89,17 +89,17 @@ extension YandexDisk {
                     case .Directory:
 
                         if let embedded = jsonRoot["_embedded"] as? NSDictionary,
-                            path_str = embedded["path"] as? String,
-                            sort_str = embedded["sort"] as? String,
-                            limit_nr = embedded["limit"] as? NSNumber,
-                            offset_nr = embedded["offset"] as? NSNumber,
-                            total_nr = embedded["total"] as? NSNumber,
-                            items = SimpleResource.resourcesFromArray(embedded["items"] as? NSArray)
+                           let path_str = embedded["path"] as? String,
+                           let sort_str = embedded["sort"] as? String,
+                           let limit_nr = embedded["limit"] as? NSNumber,
+                           let offset_nr = embedded["offset"] as? NSNumber,
+                           let total_nr = embedded["total"] as? NSNumber,
+                           let items = SimpleResource.resourcesFromArray(embedded["items"] as? NSArray)
                         {
                             let path    = Path.pathWithString(path_str)
-                            let limit   = limit_nr.integerValue
-                            let offset  = offset_nr.integerValue
-                            let total   = total_nr.integerValue
+                            let limit   = limit_nr.intValue
+                            let offset  = offset_nr.intValue
+                            let total   = total_nr.intValue
                             let sort    = SortKey(rawValue: sort_str)
                             return result.set(.Listing(dir: rootItem, limit: limit, offset: offset, total: total, path: path, sort: sort, items: items))
                         } else {

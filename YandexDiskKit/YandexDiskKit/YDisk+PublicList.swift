@@ -46,7 +46,7 @@ extension YandexDisk {
     /// API reference:
     ///   `english http://api.yandex.com/disk/api/reference/public.xml`_,
     ///   `russian https://tech.yandex.ru/disk/api/reference/public-docpage/`_.
-    public func listPublic(key public_key:String, path:String?=nil, sort:SortKey?=nil, limit:Int?=nil, offset:Int?=nil, preview_size:PreviewSize?=nil, preview_crop:Bool?=nil, handler:((listing:ListingResult) -> Void)? = nil) -> Result<ListingResult> {
+    public func listPublic(key public_key:String, path:String?=nil, sort:SortKey?=nil, limit:Int?=nil, offset:Int?=nil, preview_size:PreviewSize?=nil, preview_crop:Bool?=nil, handler:((ListingResult) -> Void)? = nil) -> Result<ListingResult> {
 
         var url = "\(baseURL)/v1/disk/public/resources?public_key=\(public_key.urlEncoded())"
 

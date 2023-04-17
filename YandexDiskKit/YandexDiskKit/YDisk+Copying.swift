@@ -32,7 +32,7 @@ extension YandexDisk {
     public enum CopyResult {
         case Done(href:String, method:String, templated:Bool)
         case InProcess(href:String, method:String, templated:Bool)
-        case Failed(NSError!)
+        case Failed(Error)
     }
 
     /// Copy file or folder
@@ -50,7 +50,7 @@ extension YandexDisk {
     /// API reference:
     ///   `english http://api.yandex.com/disk/api/reference/copy.xml`_,
     ///   `russian https://tech.yandex.ru/disk/api/reference/copy-docpage/`_.
-    public func copyPath(path:Path, fromPath:Path, overwrite:Bool?=nil, handler:((result:CopyResult) -> Void)? = nil) -> Result<CopyResult> {
+    public func copyPath(_ path:Path, fromPath:Path, overwrite:Bool?=nil, handler:((CopyResult) -> Void)? = nil) -> Result<CopyResult> {
         let result = Result<CopyResult>(handler: handler)
 
         var url = "\(baseURL)/v1/disk/resources/copy?path=\(path.toUrlEncodedString)&from=\(fromPath.toUrlEncodedString)"

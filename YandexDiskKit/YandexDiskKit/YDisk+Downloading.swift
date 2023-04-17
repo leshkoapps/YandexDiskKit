@@ -31,7 +31,7 @@ extension YandexDisk {
 
     public enum DownloadResult {
         case Done
-        case Failed(NSError!)
+        case Failed(Error)
     }
 
     /// Downloads a resource from Yandex Disk.
@@ -44,12 +44,12 @@ extension YandexDisk {
     /// API reference:
     ///   `english http://api.yandex.com/disk/api/reference/content.xml`_,
     ///   `russian https://tech.yandex.ru/disk/api/reference/content-docpage/`_.
-    public func downloadPath(path:Path, toURL:NSURL, handler:((result:DownloadResult) -> Void)? = nil) -> Result<DownloadResult> {
+    public func downloadPath(_ path:Path, toURL:URL, handler:((DownloadResult) -> Void)? = nil) -> Result<DownloadResult> {
         let url = "\(baseURL)/v1/disk/resources/download?path=\(path.toUrlEncodedString)"
         return _downloadURL(url, toURL: toURL, handler: handler)
     }
 
-    func _downloadURL(url:String, toURL:NSURL, handler:((result:DownloadResult) -> Void)? = nil) -> Result<DownloadResult> {
+    func _downloadURL(_ url:String, toURL:URL, handler:((DownloadResult) -> Void)? = nil) -> Result<DownloadResult> {
         let result = Result<DownloadResult>(handler: handler)
 
         let error = { result.set(.Failed($0)) }
@@ -58,29 +58,27 @@ extension YandexDisk {
             (jsonRoot, response)->Void in
 
             let (href, method, templated) = YandexDisk.hrefMethodTemplatedWithDictionary(jsonRoot)
+            let url = URL(string: href);
+            var request = URLRequest(url: url!);
+            request.httpMethod = method
 
-            let request = NSMutableURLRequest()
-            request.URL = NSURL(string: href)
-            request.HTTPMethod = method
-
-            self.transferSession.downloadTaskWithRequest(request) {
+            self.transferSession.downloadTask(with: request) {
                 (url, response, trasferError)->Void in
 
                 if trasferError != nil {
-                    return error(trasferError)
+                    return error(trasferError!)
                 }
 
                 if let url = url {
-                    let fm = NSFileManager.defaultManager()
-                    var fmerror : NSError?
-
-                    fm.copyItemAtURL(url, toURL: toURL, error: &fmerror)
-
-                    if fmerror != nil {
-                        return error(fmerror)
+                    let fm = FileManager.default;
+                    do {
+                        try fm.copyItem(at: url, to: toURL)
+                        return result.set(.Done)
+                    }
+                    catch (let err) {
+                        return error(err)
                     }
                 }
-                return result.set(.Done)
             }.resume()
         }.resume()
 

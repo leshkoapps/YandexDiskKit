@@ -32,7 +32,7 @@ extension YandexDisk {
     public enum MoveResult {
         case Done(href:String, method:String, templated:Bool)
         case InProcess(href:String, method:String, templated:Bool)
-        case Failed(NSError!)
+        case Failed(Error)
     }
     
     /// Move file or folder
@@ -50,7 +50,7 @@ extension YandexDisk {
     /// API reference:
     ///   `english http://api.yandex.com/disk/api/reference/move.xml`_,
     ///   `russian https://tech.yandex.ru/disk/api/reference/move-docpage/`_.
-    public func movePath(path:Path, fromPath:Path, overwrite:Bool?=nil, handler:((result:MoveResult) -> Void)? = nil) -> Result<MoveResult> {
+    public func movePath(_ path:Path, fromPath:Path, overwrite:Bool?=nil, handler:((MoveResult) -> Void)? = nil) -> Result<MoveResult> {
         let result = Result<MoveResult>(handler: handler)
 
         var url = "\(baseURL)/v1/disk/resources/move?path=\(path.toUrlEncodedString)&from=\(fromPath.toUrlEncodedString)"

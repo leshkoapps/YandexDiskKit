@@ -28,7 +28,7 @@
 import Foundation
 import CoreData
 
-public enum YandexDiskResourceType : String, Printable {
+public enum YandexDiskResourceType : String, CustomStringConvertible {
     case File = "file"
     case Directory = "dir"
 
@@ -38,13 +38,13 @@ public enum YandexDiskResourceType : String, Printable {
     }
 }
 
-public protocol YandexDiskResource : Printable {
+public protocol YandexDiskResource {
 
     var type : YandexDiskResourceType { get }
     var path : YandexDisk.Path { get }
     var name: String { get }
-    var created: NSDate { get }
-    var modified: NSDate { get }
+    var created: Date { get }
+    var modified: Date { get }
     var size: NSNumber? { get }
     var md5: String? { get }
     var mime_type: String? { get }
@@ -64,8 +64,8 @@ extension YandexDisk {
         public let type : YandexDiskResourceType
         public let name : String
         public let path : YandexDisk.Path
-        public let created : NSDate
-        public let modified : NSDate
+        public let created : Date
+        public let modified : Date
         public let size : NSNumber?
         public let md5 : String?
         public let mime_type : String?
@@ -76,9 +76,9 @@ extension YandexDisk {
         public let origin_path: String?
         public let custom_properties: NSDictionary?
 
-        private static let dateformatter = NSDateFormatter.iso8601dateFormatter()
+        private static let dateformatter = DateFormatter.iso8601dateFormatter()
 
-        init(type: YandexDiskResourceType, name: String, path: YandexDisk.Path, created: NSDate, modified: NSDate, dictionary props: NSDictionary) {
+        init(type: YandexDiskResourceType, name: String, path: YandexDisk.Path, created: Date, modified: Date, dictionary props: NSDictionary) {
             self.type = type
             self.name = name
             self.path = path
@@ -86,7 +86,7 @@ extension YandexDisk {
             self.modified = modified
 
             // the following properties are optional and can be absent
-            size = (props["size"] as? NSNumber)?.integerValue
+            size = props["size"] as? NSNumber
             preview = props["preview"] as? String
             mime_type = props["mime_type"] as? String
             md5 = props["md5"] as? String
@@ -97,28 +97,28 @@ extension YandexDisk {
             custom_properties = props["custom_properties"] as? NSDictionary
         }
 
-        class func resourceFromDictionary(properties:NSDictionary?) -> YandexDiskResource? {
+        class func resourceFromDictionary(_ properties:NSDictionary?) -> YandexDiskResource? {
             // According to API documentationthe following properties are
             // required, so we will fail if they are not existing
 
             if let props = properties,
-                str = props["type"] as? String,
-                type = YandexDiskResourceType(rawValue: str),
-                name = props["name"] as? String,
-                path_str = props["path"] as? String,
-                created_str = props["created"] as? String,
-                modified_str = props["modified"] as? String
+               let str = props["type"] as? String,
+               let type = YandexDiskResourceType(rawValue: str),
+               let name = props["name"] as? String,
+               let path_str = props["path"] as? String,
+               let created_str = props["created"] as? String,
+               let modified_str = props["modified"] as? String
             {
                 let path = Path.pathWithString(path_str)
-                let created = dateformatter.dateFromString(created_str) ?? NSDate(timeIntervalSince1970: 0)
-                let modified = dateformatter.dateFromString(modified_str) ?? NSDate(timeIntervalSince1970: 0)
+                let created = dateformatter.date(from: created_str) ?? Date(timeIntervalSince1970: 0)
+                let modified = dateformatter.date(from: modified_str) ?? Date(timeIntervalSince1970: 0)
 
                 return SimpleResource(type: type, name: name, path: path, created: created, modified: modified, dictionary: props)
             }
             return nil
         }
 
-        class func resourcesFromArray(array:NSArray?) -> [YandexDiskResource]? {
+        class func resourcesFromArray(_ array:NSArray?) -> [YandexDiskResource]? {
 
             var elements: [YandexDiskResource] = []
 

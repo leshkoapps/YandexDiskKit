@@ -31,7 +31,7 @@ extension YandexDisk {
 
     public enum FileResourceListingResult {
         case Listing(items:[YandexDiskResource], limit:Int?, offset:Int? )
-        case Failed(NSError!)
+        case Failed(Error)
     }
 
     /// List metainfo for files.
@@ -48,7 +48,7 @@ extension YandexDisk {
     /// API reference:
     ///   `english http://api.yandex.com/disk/api/reference/all-files.xml`_,
     ///   `russian https://tech.yandex.ru/disk/api/reference/all-files-docpage/`_.
-    public func listFileResources(limit:Int?=nil, offset:Int?=nil, media_type:String?=nil, preview_size:PreviewSize?=nil, preview_crop:Bool?=nil, sort:SortKey?=nil, handler:((listing:FileResourceListingResult) -> Void)? = nil) -> Result<FileResourceListingResult> {
+    public func listFileResources(_ limit:Int?=nil, offset:Int?=nil, media_type:String?=nil, preview_size:PreviewSize?=nil, preview_crop:Bool?=nil, sort:SortKey?=nil, handler:((FileResourceListingResult) -> Void)? = nil) -> Result<FileResourceListingResult> {
         let result = Result<FileResourceListingResult>(handler: handler)
 
         var url = "\(baseURL)/v1/disk/resources/files"
@@ -69,8 +69,8 @@ extension YandexDisk {
             case 200:
                 if let items = SimpleResource.resourcesFromArray(jsonRoot["items"] as? NSArray)
                 {
-                    let limit = (jsonRoot["limit"] as? NSNumber)?.integerValue
-                    let offset = (jsonRoot["offset"] as? NSNumber)?.integerValue
+                    let limit = (jsonRoot["limit"] as? NSNumber)?.intValue
+                    let offset = (jsonRoot["offset"] as? NSNumber)?.intValue
 
                     return result.set(.Listing(items: items, limit: limit, offset: offset))
                 } else {

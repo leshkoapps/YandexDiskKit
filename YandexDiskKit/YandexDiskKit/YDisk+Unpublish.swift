@@ -31,7 +31,7 @@ extension YandexDisk {
 
     public enum UnpublishResult {
         case Done
-        case Failed(NSError!)
+        case Failed(Error)
     }
 
     /// Closing access to a resource
@@ -43,7 +43,7 @@ extension YandexDisk {
     /// API reference:
     ///   `english http://api.yandex.com/disk/api/reference/publish.xml`_,
     ///   `russian https://tech.yandex.ru/disk/api/reference/publish-docpage/`_.
-    public func unpublishPath(path:Path, handler:((result:UnpublishResult) -> Void)? = nil) -> Result<UnpublishResult> {
+    public func unpublishPath(_ path:Path, handler:((UnpublishResult) -> Void)? = nil) -> Result<UnpublishResult> {
         let result = Result<UnpublishResult>(handler: handler)
 
         var url = "\(baseURL)/v1/disk/resources/unpublish/?path=\(path.toUrlEncodedString)"

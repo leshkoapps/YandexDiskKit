@@ -33,7 +33,7 @@ public class Result<T> {
 
     var result: T? {
         willSet {
-            if let handler = onResult, value = newValue {
+            if let handler = onResult, let value = newValue {
                 handler(value)
             }
         }
@@ -44,7 +44,7 @@ public class Result<T> {
         }
     }
 
-    func set(result: T) {
+    func set(_ result: T) {
         if self.result == nil {
             self.result = result
         }
@@ -61,7 +61,7 @@ public class Result<T> {
     }
 
     public func get() -> T {
-        await()
+        self.await()
         return result!
     }
 

@@ -31,7 +31,7 @@ extension YandexDisk {
 
     public enum MakeFolderResult {
         case Created(href:String, method:String, templated:Bool)
-        case Failed(NSError!)
+        case Failed(Error)
     }
     
     /// Make Folder
@@ -45,7 +45,7 @@ extension YandexDisk {
     /// API reference:
     ///   `english http://api.yandex.com/disk/api/reference/create-folder.xml`_,
     ///   `russian https://tech.yandex.ru/disk/api/reference/create-folder-docpage/`_.
-    public func makeFolderAtPath(path:Path, handler:((result:MakeFolderResult) -> Void)? = nil) -> Result<MakeFolderResult> {
+    public func makeFolderAtPath(_ path:Path, handler:((MakeFolderResult) -> Void)? = nil) -> Result<MakeFolderResult> {
         let result = Result<MakeFolderResult>(handler: handler)
 
         var url = "\(baseURL)/v1/disk/resources?path=\(path.toUrlEncodedString)"
@@ -57,7 +57,8 @@ extension YandexDisk {
 
             switch response.statusCode {
             case 201:
-                return result.set(.Created(YandexDisk.hrefMethodTemplatedWithDictionary(jsonRoot)))
+                let (href, method, templated) = YandexDisk.hrefMethodTemplatedWithDictionary(jsonRoot);
+                return result.set(.Created(href: href, method: method, templated: templated));
 
             default:
                 return error(NSError(domain: "YDisk", code: response.statusCode, userInfo: ["response":response]))

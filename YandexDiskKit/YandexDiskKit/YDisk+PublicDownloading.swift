@@ -40,7 +40,7 @@ extension YandexDisk {
     /// API reference:
     ///   `english http://api.yandex.com/disk/api/reference/public.xml`_,
     ///   `russian https://tech.yandex.ru/disk/api/reference/public-docpage/`_.
-    public func downloadPublic(key public_key:String, path:String?=nil, toURL:NSURL, handler:((result:DownloadResult) -> Void)? = nil) -> Result<DownloadResult> {
+    public func downloadPublic(key public_key:String, path:String?=nil, toURL:URL, handler:((DownloadResult) -> Void)? = nil) -> Result<DownloadResult> {
 
         var url = "\(baseURL)/v1/disk/public-resources/download/?public_key=\(public_key.urlEncoded())"
 

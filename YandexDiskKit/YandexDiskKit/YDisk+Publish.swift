@@ -31,7 +31,7 @@ extension YandexDisk {
 
     public enum PublishResult {
         case Done
-        case Failed(NSError!)
+        case Failed(Error)
     }
 
     /// Publish a resource
@@ -43,7 +43,7 @@ extension YandexDisk {
     /// API reference:
     ///   `english http://api.yandex.com/disk/api/reference/publish.xml`_,
     ///   `russian https://tech.yandex.ru/disk/api/reference/publish-docpage/`_.
-    public func publishPath(path:Path, handler:((result:PublishResult) -> Void)? = nil) -> Result<PublishResult> {
+    public func publishPath(_ path:Path, handler:((PublishResult) -> Void)? = nil) -> Result<PublishResult> {
         let result = Result<PublishResult>(handler: handler)
 
         var url = "\(baseURL)/v1/disk/resources/publish/?path=\(path.toUrlEncodedString)"

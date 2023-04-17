@@ -32,7 +32,7 @@ extension YandexDisk {
     public enum PublicSaveResult {
         case Done(href:String, method:String, templated:Bool)
         case InProcess(href:String, method:String, templated:Bool)
-        case Failed(NSError!)
+        case Failed(Error)
     }
 
     /// Downloads a public resource to Yandex Disk.
@@ -47,7 +47,7 @@ extension YandexDisk {
     /// API reference:
     ///   `english http://api.yandex.com/disk/api/reference/public.xml`_,
     ///   `russian https://tech.yandex.ru/disk/api/reference/public-docpage/`_.
-    public func savePublicToDisk(key public_key: String, name: String?=nil, path: String?=nil, handler:((result:PublicSaveResult) -> Void)? = nil) -> Result<PublicSaveResult> {
+    public func savePublicToDisk(key public_key: String, name: String?=nil, path: String?=nil, handler:((PublicSaveResult) -> Void)? = nil) -> Result<PublicSaveResult> {
         let result = Result<PublicSaveResult>(handler: handler)
 
         var url = "\(baseURL)/v1/disk/public-resources/save-to-disk/?public_key=\(public_key.urlEncoded())"

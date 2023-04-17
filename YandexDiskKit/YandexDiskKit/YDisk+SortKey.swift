@@ -29,7 +29,7 @@ import Foundation
 
 extension YandexDisk {
 
-    public enum SortKey : String, Printable {
+    public enum SortKey : String, CustomStringConvertible {
         case Name = "name"
         case Path = "path"
         case Created = "created"

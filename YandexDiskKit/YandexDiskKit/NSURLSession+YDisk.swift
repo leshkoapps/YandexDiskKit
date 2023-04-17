@@ -27,27 +27,27 @@
 
 import Foundation
 
-extension NSURLSession {
+extension URLSession {
 
-    func jsonTaskWithURL(url: String, method:String = "GET", body:NSData?=nil, errorHandler: ((NSError!) -> Void), completionHandler: ((NSDictionary, NSHTTPURLResponse) -> Void)) -> NSURLSessionDataTask {
-        let request = NSMutableURLRequest()
-        request.URL = NSURL(string: url)
-        request.HTTPMethod = method
+    func jsonTaskWithURL(_ url: String, method:String = "GET", body:Data?=nil, errorHandler: @escaping ((Error) -> Void), completionHandler: @escaping ((NSDictionary, HTTPURLResponse) -> Void)) -> URLSessionDataTask {
+        let url = URL(string: url);
+        var request = URLRequest(url: url!);
+        request.httpMethod = method
         return jsonTaskWithRequest(request, body: body, errorHandler: errorHandler, completionHandler: completionHandler)
     }
 
-    func jsonTaskWithRequest(request: NSURLRequest, body:NSData?=nil, errorHandler: ((NSError!) -> Void), completionHandler: ((NSDictionary, NSHTTPURLResponse) -> Void)) -> NSURLSessionDataTask {
+    func jsonTaskWithRequest(_ request: URLRequest, body:Data?=nil, errorHandler: @escaping ((Error) -> Void), completionHandler: @escaping ((NSDictionary, HTTPURLResponse) -> Void)) -> URLSessionDataTask {
 
-        let requestBody = body ?? NSData()
-
-        return uploadTaskWithRequest(request, fromData: requestBody) {
+        let requestBody = body ?? Data()
+        
+        return uploadTask(with: request, from: requestBody) {
             (data, response, error)->Void in
 
             if error != nil {
-                return errorHandler(error)
+                return errorHandler(error!)
             }
 
-            if let response = response as? NSHTTPURLResponse {
+            if let response = response as? HTTPURLResponse {
                 
                 if let jsonRoot = YandexDisk.JSONDictionaryWithData(data, errorHandler:errorHandler) {
                     switch response.statusCode {

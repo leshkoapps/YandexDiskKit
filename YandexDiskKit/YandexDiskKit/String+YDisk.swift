@@ -31,15 +31,15 @@ extension String {
 
     func urlEncoded() -> String {
         let charactersToEscape = "!*'();:@&=+$,/?%#[]\" "
-        let allowedCharacters = NSCharacterSet(charactersInString: charactersToEscape).invertedSet
-        return self.stringByAddingPercentEncodingWithAllowedCharacters(allowedCharacters) ?? self
+        let allowedCharacters = CharacterSet(charactersIn: charactersToEscape).inverted
+        return self.addingPercentEncoding(withAllowedCharacters: allowedCharacters) ?? self
     }
 
-    mutating func appendOptionalURLParameter<T>(name: String, value: T?) {
+    mutating func appendOptionalURLParameter<T>(_ name: String, value: T?) {
         if let value = value {
-            let seperator = self.rangeOfString("?") == nil ? "?" : "&"
+            let seperator = self.range(of:"?") == nil ? "?" : "&"
 
-            self.splice("\(seperator)\(name)=\(value)", atIndex: self.endIndex)
+            self.insert(contentsOf: "\(seperator)\(name)=\(value)", at: self.endIndex);
         }
     }
 }

@@ -31,7 +31,7 @@ extension YandexDisk {
 
     public enum MetainfoResult {
         case Done(total_space: Int, used_space: Int, trash_size: Int, system_folders:[String:Path])
-        case Failed(NSError!)
+        case Failed(Error)
     }
 
     /// Recieves meta info about the disk
@@ -42,7 +42,7 @@ extension YandexDisk {
     /// API reference:
     ///   `english http://api.yandex.com/disk/api/reference/capacity.xml`_,
     ///   `russian https://tech.yandex.ru/disk/api/reference/capacity-docpage/`_.
-    public func metainfo(handler:((result:MetainfoResult) -> Void)? = nil) -> Result<MetainfoResult> {
+    public func metainfo(_ handler:((MetainfoResult) -> Void)? = nil) -> Result<MetainfoResult> {
         let result = Result<MetainfoResult>(handler: handler)
 
         var url = "\(baseURL)/v1/disk/"
@@ -55,14 +55,14 @@ extension YandexDisk {
             switch response.statusCode {
             case 200:
                 if let system_folders_dict = jsonRoot["system_folders"] as? NSDictionary,
-                    total_space = (jsonRoot["total_space"] as? NSNumber)?.integerValue,
-                    used_space = (jsonRoot["used_space"] as? NSNumber)?.integerValue,
-                    trash_size = (jsonRoot["trash_size"] as? NSNumber)?.integerValue
+                   let total_space = (jsonRoot["total_space"] as? NSNumber)?.intValue,
+                   let used_space = (jsonRoot["used_space"] as? NSNumber)?.intValue,
+                   let trash_size = (jsonRoot["trash_size"] as? NSNumber)?.intValue
                 {
                     var system_folders = Dictionary<String, Path>()
                     for (key, value) in system_folders_dict {
                         if let key = key as? String,
-                            value = value as? String
+                           let value = value as? String
                         {
                             system_folders[key] = Path.pathWithString(value)
                         }

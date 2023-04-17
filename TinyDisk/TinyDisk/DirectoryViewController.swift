@@ -29,7 +29,7 @@ import UIKit
 import YandexDiskKit
 
 public protocol DirectoryViewControllerDelegate {
-    func directoryViewController(dirController:DirectoryViewController!, didSelectFileWithURL fileURL: NSURL?, resource:YandexDiskResource) -> Void
+    func directoryViewController(_ dirController:DirectoryViewController!, didSelectFileWithURL fileURL: URL?, resource:YandexDiskResource) -> Void
 }
 
 public class DirectoryViewController: UITableViewController {
@@ -39,48 +39,48 @@ public class DirectoryViewController: UITableViewController {
     var dirItem: YandexDiskResource?
     var entries: [YandexDiskResource?] = []
 
-    required public init(coder aDecoder: NSCoder) {
+    required public init?(coder aDecoder: NSCoder) {
         super.init(coder: aDecoder)
     }
 
-    override init(style: UITableViewStyle) {
+    override init(style: UITableView.Style) {
         super.init(style: style)
 
         refreshControl = UIRefreshControl()
         if let refreshControl = refreshControl {
-            refreshControl.addTarget(self, action: Selector("reloadDir"), forControlEvents: .ValueChanged)
+            refreshControl.addTarget(self, action: #selector(self.reloadDir(_:)), for: .valueChanged)
         }
     }
 
     public convenience init?(disk: YandexDisk) {
-        self.init(style: .Plain)
+        self.init(style: .plain)
         self.disk = disk
 
         refreshTitle()
-        reloadDir()
+        reloadDir(nil)
     }
 
     public convenience init?(disk: YandexDisk, path: YandexDiskResource) {
-        self.init(style: .Plain)
+        self.init(style: .plain)
         self.disk = disk
         self.dirItem = path
 
         refreshTitle()
-        reloadDir()
+        reloadDir(nil)
     }
 
-    private var bundle : NSBundle {
-        return NSBundle(forClass: DirectoryViewController.self)
+    private var bundle : Bundle {
+        return Bundle(for: DirectoryViewController.self)
     }
 
-    func reloadDir() -> Void {
+    @IBAction func reloadDir(_ sender: Any?) -> Void {
         var ownPath = YandexDisk.Path.Disk("")
 
         if let path = dirItem {
             ownPath = path.path
         }
-
-        dispatch_async(dispatch_get_main_queue()) {
+        
+        DispatchQueue.main.async {
             if let refreshControl = self.refreshControl {
                 refreshControl.beginRefreshing()
             }
@@ -92,31 +92,31 @@ public class DirectoryViewController: UITableViewController {
     func listHandler(listing:YandexDisk.ListingResult) -> Void {
         switch listing {
         case .Failed(let error):
-            println("An error occured: \(error.localizedDescription)")
+            print("An error occured: \(error.localizedDescription)")
         case .File(let file):
-            println("Callback Handler was called for a file: \(file.name) at path: \(file.path)")
+            print("Callback Handler was called for a file: \(file.name) at path: \(file.path)")
         case let .Listing(dir, limit, offset, total, path, sort, items):
             if offset == 0 {
-                self.entries = Array<YandexDiskResource?>(count: total, repeatedValue: nil)
+                self.entries = Array<YandexDiskResource?>.init(repeating: nil, count: total)
 
                 if total > items.count {
                     let sliceSize = 100
 
-                    for (var sliceOffset = limit; sliceOffset < total; sliceOffset+=sliceSize) {
-                        disk.listPath(path, limit: sliceSize, offset: sliceOffset, sort: sort, handler: listHandler)
+                    for sliceOffset in stride(from: limit, to: total, by: sliceSize) {
+                        disk.listPath(path, sort: sort, limit: sliceSize, offset: sliceOffset, handler: listHandler)
                     }
                 }
             }
-            for (index, item) in enumerate(items) {
+            for (index, item) in items.enumerated() {
                 self.entries[offset + index] = item
             }
 
-            dispatch_async(dispatch_get_main_queue()) {
+            DispatchQueue.main.async {
                 self.tableView.reloadData()
             }
         }
 
-        dispatch_async(dispatch_get_main_queue()) {
+        DispatchQueue.main.async {
             if let refreshControl = self.refreshControl {
                 refreshControl.endRefreshing()
             }
@@ -134,31 +134,32 @@ public class DirectoryViewController: UITableViewController {
 
     func refreshTitle() {
         if let pathListing = dirItem {
-            title = pathListing.path.description.lastPathComponent
+            let string = pathListing.path.description;
+            if let index = string.lastIndex(of: "/") {
+                title = String( string[string.index(after: index)..<string.endIndex] );
+            } else {
+                title = string;
+            }
         } else {
             title = "Tiny Disk"
         }
     }
 
     // MARK: UITableView methods
-
-    override public func numberOfSectionsInTableView(tableView: UITableView) -> Int {
+    
+    public override func numberOfSections(in tableView: UITableView) -> Int {
         return 1
     }
 
-    override public func tableView(tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+    public override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         return entries.count
     }
 
-    override public func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell  {
+    public override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
 
         let cellIdentifier = "TinyDiskDirCell"
 
-        var cell : UITableViewCell! = tableView.dequeueReusableCellWithIdentifier(cellIdentifier) as? UITableViewCell
-
-        if cell == nil {
-            cell = UITableViewCell(style: .Subtitle, reuseIdentifier: cellIdentifier)
-        }
+        let cell = tableView.dequeueReusableCell(withIdentifier: cellIdentifier) ?? UITableViewCell(style: .subtitle, reuseIdentifier: cellIdentifier);
 
         if let entry = entries[indexPath.row] {
 
@@ -167,18 +168,18 @@ public class DirectoryViewController: UITableViewController {
 
             switch entry.type {
             case .Directory:
-                cell.imageView?.image = UIImage(named: "Folder_icon", inBundle:self.bundle, compatibleWithTraitCollection:nil)
-                cell.accessoryType = .DetailDisclosureButton
+                cell.imageView?.image = UIImage(named: "Folder_icon", in:self.bundle, compatibleWith:nil)
+                cell.accessoryType = .detailDisclosureButton
             case .File:
-                cell.imageView?.image = UIImage(named: "File_icon", inBundle:self.bundle, compatibleWithTraitCollection:nil)
-                cell.accessoryType = .None
+                cell.imageView?.image = UIImage(named: "File_icon", in:self.bundle, compatibleWith:nil)
+                cell.accessoryType = .none
             }
         }
 
         return cell
     }
 
-    override public func tableView(tableView: UITableView, didSelectRowAtIndexPath indexPath: NSIndexPath) {
+    public override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         if let entry = entries[indexPath.row] {
             switch entry.type {
             case .Directory:
@@ -192,24 +193,24 @@ public class DirectoryViewController: UITableViewController {
         }
     }
 
-    override public func tableView(tableView: UITableView, accessoryButtonTappedForRowWithIndexPath indexPath: NSIndexPath) {
+    public override func tableView(_ tableView: UITableView, accessoryButtonTappedForRowWith indexPath: IndexPath) {
         if let entry = entries[indexPath.row] {
             delegate?.directoryViewController(self, didSelectFileWithURL: nil, resource: entry)
         }
     }
 
-    override public func tableView(tableView: UITableView, canEditRowAtIndexPath indexPath: NSIndexPath) -> Bool {
+    public override func tableView(_ tableView: UITableView, canEditRowAt indexPath: IndexPath) -> Bool {
         return true
     }
 
-    override public func tableView(tableView: UITableView, commitEditingStyle editingStyle: UITableViewCellEditingStyle, forRowAtIndexPath indexPath: NSIndexPath) {
+    public override func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCell.EditingStyle, forRowAt indexPath: IndexPath) {
         switch editingStyle {
-        case .None:
+        case .none:
             break
-        case .Insert:
+        case .insert:
             break
 
-        case .Delete:
+        case .delete:
             if let entry = entries[indexPath.row] {
                 disk.deletePath(entry.path, permanently:nil) {
                     (result) in
@@ -217,30 +218,32 @@ public class DirectoryViewController: UITableViewController {
                     case .Failed:
                         break
                     default:
-                        self.reloadDir()
+                        self.reloadDir(nil)
                     }
                 }
             }
+        default:
+            break;
         }
         return
     }
 
-    override public func tableView(tableView: UITableView, titleForDeleteConfirmationButtonForRowAtIndexPath indexPath: NSIndexPath) -> String!  {
+    public override func tableView(_ tableView: UITableView, titleForDeleteConfirmationButtonForRowAt indexPath: IndexPath) -> String? {
         return "Delete"
     }
 
-    func performAction(action: UITableViewRowAction!, indexPath: NSIndexPath!) {
+    func performAction(action: UITableViewRowAction, indexPath: IndexPath) {
 
         if let entry = self.entries[indexPath.row] {
-            switch action.title as String {
+            switch action.title {
             case "Unpublish":
                 disk.unpublishPath(entry.path) {  _ in
-                    self.reloadDir()
+                    self.reloadDir(nil)
                 }
 
             case "Publish":
                 disk.publishPath(entry.path) { _ in
-                    self.reloadDir()
+                    self.reloadDir(nil)
                 }
 
             default:
@@ -249,21 +252,21 @@ public class DirectoryViewController: UITableViewController {
         }
     }
 
-    override public func tableView(tableView: UITableView, editActionsForRowAtIndexPath indexPath: NSIndexPath) -> [AnyObject]? {
+    public override func tableView(_ tableView: UITableView, editActionsForRowAt indexPath: IndexPath) -> [UITableViewRowAction]? {
 
-        let deleteAction = UITableViewRowAction(style: .Default, title: "Delete") {
+        let deleteAction = UITableViewRowAction(style: .default, title: "Delete") {
             (action, indexPath) -> Void in
-            self.tableView(tableView, commitEditingStyle: .Delete, forRowAtIndexPath: indexPath)
+            self.tableView(tableView, commit: .delete, forRowAt: indexPath)
         }
 
         if let entry = entries[indexPath.row] {
             if entry.public_url != nil {
-                let unpublishAction = UITableViewRowAction(style: .Default, title: "Unpublish", handler: performAction)
-                unpublishAction.backgroundColor = UIColor.orangeColor()
+                let unpublishAction = UITableViewRowAction(style: .default, title: "Unpublish", handler: performAction)
+                unpublishAction.backgroundColor = UIColor.orange
                 return [deleteAction, unpublishAction]
             } else {
-                let publishAction = UITableViewRowAction(style: .Default, title: "Publish", handler: performAction)
-                publishAction.backgroundColor = UIColor.greenColor()
+                let publishAction = UITableViewRowAction(style: .default, title: "Publish", handler: performAction)
+                publishAction.backgroundColor = UIColor.green
                 return [deleteAction, publishAction]
             }
         }

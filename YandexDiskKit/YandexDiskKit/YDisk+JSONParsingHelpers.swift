@@ -29,12 +29,12 @@ import Foundation
 
 extension YandexDisk {
 
-    class func hrefMethodTemplatedWithDictionary(dict:NSDictionary?) -> (href:String, method:String, templated:Bool) {
+    class func hrefMethodTemplatedWithDictionary(_ dict:NSDictionary?) -> (href:String, method:String, templated:Bool) {
 
         if let json = dict,
-            href = json["href"] as? String,
-            method = json["method"] as? String,
-            nr = json["templated"] as? NSNumber
+           let href = json["href"] as? String,
+           let method = json["method"] as? String,
+           let nr = json["templated"] as? NSNumber
         {
             assert(nr.boolValue == false, "Templated hrefs aren't handled.")
             return (href:href, method:method, templated:nr.boolValue)
@@ -43,24 +43,17 @@ extension YandexDisk {
         return (href:"", method:"", templated:false)
     }
 
-    class func JSONDictionaryWithData(data:NSData!, errorHandler:(NSError!)->Void) -> NSDictionary? {
-        var anyError: NSError?
-
-        if let data = data where data.length == 0 { // some
-            return [:]
+    class func JSONDictionaryWithData(_ data:Data!, errorHandler:(Error)->Void) -> NSDictionary? {
+        do {
+            guard let data = data, !data.isEmpty else { // some
+                return [:]
+            }
+            let jsonRoot = try JSONSerialization.jsonObject(with: data, options: []) as? NSDictionary
+            return jsonRoot;
         }
-
-        let jsonRoot = NSJSONSerialization.JSONObjectWithData(data, options: nil, error: &anyError) as? NSDictionary
-
-        if anyError != nil {
-            errorHandler(anyError)
-            return nil
+        catch {
+            errorHandler(error);
+            return nil;
         }
-        if jsonRoot == nil {
-            errorHandler(NSError(domain: "Couldn't create JSON dictionary.", code: 0, userInfo: ["data":data]))
-            return nil
-        }
-
-        return jsonRoot
     }
 }

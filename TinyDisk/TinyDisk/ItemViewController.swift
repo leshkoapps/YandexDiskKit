@@ -35,42 +35,42 @@ public class ItemViewController: UIViewController, UITableViewDataSource, UITabl
     @IBOutlet var preview: UIImageView!
     @IBOutlet var tableview: UITableView!
 
-    required public init(coder aDecoder: NSCoder) {
+    required public init?(coder aDecoder: NSCoder) {
         super.init(coder: aDecoder)
     }
 
-    override init(nibName nibNameOrNil: String!, bundle nibBundleOrNil: NSBundle!) {
+    override init(nibName nibNameOrNil: String?, bundle nibBundleOrNil: Bundle?) {
         super.init(nibName: nibNameOrNil, bundle: nibBundleOrNil)
     }
 
     public convenience init?(disk: YandexDisk, resource: YandexDiskResource) {
-        self.init(nibName: "ItemViewController", bundle: NSBundle(forClass: ItemViewController.self))
+        self.init(nibName: "ItemViewController", bundle: Bundle(for: ItemViewController.self))
         self.disk = disk
         self.item = resource
 
         title = item.name
     }
 
-    private var bundle : NSBundle {
-        return NSBundle(forClass: DirectoryViewController.self)
+    private var bundle : Bundle {
+        return Bundle(for: DirectoryViewController.self)
     }
 
     override public func viewDidLoad() {
         super.viewDidLoad()
 
         if item.public_url != nil {
-            self.navigationItem.rightBarButtonItem = UIBarButtonItem(barButtonSystemItem: .Action, target: self, action: Selector("action:"))
+            self.navigationItem.rightBarButtonItem = UIBarButtonItem(barButtonSystemItem: .action, target: self, action: #selector(self.action(_:)))
         }
 
         var image : UIImage!
 
         if item.type == .Directory {
-            image = UIImage(named: "Folder_icon", inBundle:self.bundle, compatibleWithTraitCollection:nil)
+            image = UIImage(named: "Folder_icon", in:self.bundle, compatibleWith:nil)
         } else {
-            image = UIImage(named: "File_icon", inBundle:self.bundle, compatibleWithTraitCollection:nil)
+            image = UIImage(named: "File_icon", in:self.bundle, compatibleWith:nil)
         }
 
-        dispatch_async(dispatch_get_main_queue()) {
+        DispatchQueue.main.async {
             if let iv = self.preview {
                 iv.image = image
                 iv.setNeedsDisplay()
@@ -78,13 +78,13 @@ public class ItemViewController: UIViewController, UITableViewDataSource, UITabl
         }
 
         if let preview = item.preview {
-            disk.session.dataTaskWithURL(NSURL(string: preview)!) {
+            disk.session.dataTask(with: URL(string: preview)!) {
                 (data, response, error) -> Void in
 
-                let res = response as? NSHTTPURLResponse
-                let image = UIImage(data: data)
+                let res = response as? HTTPURLResponse
+                let image = UIImage(data: data!)
 
-                dispatch_async(dispatch_get_main_queue()) {
+                DispatchQueue.main.async {
                     if let iv = self.preview {
                         iv.image = image
                         iv.setNeedsDisplay()
@@ -99,21 +99,21 @@ public class ItemViewController: UIViewController, UITableViewDataSource, UITabl
         // Dispose of any resources that can be recreated.
     }
 
-    func action(sender:AnyObject?) {
+    @IBAction func action(_ sender:AnyObject?) {
         let activityItems = [ item.public_url! ]
 
         let activityView = UIActivityViewController(activityItems: activityItems, applicationActivities: nil)
-        activityView.modalPresentationStyle = .Popover
+        activityView.modalPresentationStyle = .popover
 
         if let  popoverController = activityView.popoverPresentationController {
-            if let view = sender?.valueForKey("view") as? UIView {
+            if let view = sender?.value(forKey: "view") as? UIView {
                 popoverController.sourceView = view
                 popoverController.sourceRect = view.bounds
             }
-            popoverController.permittedArrowDirections = .Any
+            popoverController.permittedArrowDirections = .any
         }
 
-        presentViewController(activityView, animated: true) { }
+        present(activityView, animated: true) { }
     }
 
     // #pragma mark - Table view data source
@@ -122,19 +122,15 @@ public class ItemViewController: UIViewController, UITableViewDataSource, UITabl
         return 1
     }
 
-    public func tableView(tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+    public func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         return 11
     }
 
-    public func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
+    public func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
 
         let cellIdentifier = "TinyDiskItemCell"
 
-        var cell : UITableViewCell! = tableView.dequeueReusableCellWithIdentifier(cellIdentifier) as? UITableViewCell
-
-        if cell == nil {
-            cell = UITableViewCell(style: .Subtitle, reuseIdentifier: cellIdentifier)
-        }
+        let cell = tableView.dequeueReusableCell(withIdentifier: cellIdentifier) ?? UITableViewCell(style: .subtitle, reuseIdentifier: cellIdentifier)
 
         var name : String?
         var value : String?
@@ -183,7 +179,7 @@ public class ItemViewController: UIViewController, UITableViewDataSource, UITabl
         return cell
     }
 
-    public func tableView(tableView: UITableView, shouldHighlightRowAtIndexPath indexPath: NSIndexPath) -> Bool {
+    public func tableView(_ tableView: UITableView, shouldHighlightRowAt indexPath: IndexPath) -> Bool {
         return false
     }
 

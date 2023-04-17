@@ -42,26 +42,26 @@ class AppDelegate: UIResponder, UIApplicationDelegate, DirectoryViewControllerDe
     var window: UIWindow?
     var svc: UISplitViewController!
 
-    func application(application: UIApplication, didFinishLaunchingWithOptions launchOptions: [NSObject : AnyObject]?) -> Bool {
-        window = UIWindow(frame: UIScreen.mainScreen().bounds)
+    func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey : Any]? = nil) -> Bool {
+        window = UIWindow(frame: UIScreen.main.bounds)
 
         token = loadToken()
 
-        if let launchURL = launchOptions?[UIApplicationLaunchOptionsURLKey] as? NSURL {
+        if let launchURL = launchOptions?[UIApplication.LaunchOptionsKey.url] as? URL {
             handleURL(launchURL)
         }
 
         svc = UISplitViewController()
         let rootVC = UINavigationController(rootViewController:getSuitableRootViewController())
         let nfsVC = NoFileSelectedViewController()
-        nfsVC.navigationItem.leftBarButtonItem = svc.displayModeButtonItem()
+        nfsVC.navigationItem.leftBarButtonItem = svc.displayModeButtonItem
         nfsVC.navigationItem.leftItemsSupplementBackButton = true
         let detailVC = UINavigationController(rootViewController: nfsVC)
 
         svc.delegate = self
         svc.viewControllers = [ rootVC, detailVC ]
 
-        window?.backgroundColor = UIColor.whiteColor()
+        window?.backgroundColor = UIColor.white;
         window?.rootViewController = svc
         window?.makeKeyAndVisible()
 
@@ -75,12 +75,12 @@ class AppDelegate: UIResponder, UIApplicationDelegate, DirectoryViewControllerDe
         return false
     }
 
-    func application(application: UIApplication, openURL url: NSURL, sourceApplication: String?, annotation: AnyObject?) -> Bool {
+    func application(_ application: UIApplication, open url: URL, sourceApplication: String?, annotation: Any) -> Bool {
         if handleURL(url) {
             let rootVC = getSuitableRootViewController()
             let navVC = UINavigationController(rootViewController: rootVC)
             let nfsVC = NoFileSelectedViewController()
-            nfsVC.navigationItem.leftBarButtonItem = svc.displayModeButtonItem()
+            nfsVC.navigationItem.leftBarButtonItem = svc.displayModeButtonItem
             nfsVC.navigationItem.leftItemsSupplementBackButton = true
             let detailVC = UINavigationController(rootViewController: nfsVC)
             svc = UISplitViewController()
@@ -92,26 +92,27 @@ class AppDelegate: UIResponder, UIApplicationDelegate, DirectoryViewControllerDe
         return false
     }
 
-    func directoryViewController(dirController:DirectoryViewController!, didSelectFileWithURL fileURL: NSURL?, resource:YandexDiskResource) -> Void {
-        println("Chooosen: \(resource.path)")
+    func directoryViewController(_ dirController:DirectoryViewController!, didSelectFileWithURL fileURL: URL?, resource:YandexDiskResource) -> Void {
+        print("Chooosen: \(resource.path)")
         if let itemController = ItemViewController(disk: disk, resource: resource) {
-            itemController.navigationItem.leftBarButtonItem = svc.displayModeButtonItem()
+            itemController.navigationItem.leftBarButtonItem = svc.displayModeButtonItem
             itemController.navigationItem.leftItemsSupplementBackButton = true
             let navVC = UINavigationController(rootViewController: itemController)
             svc.showDetailViewController(navVC, sender: self)
         }
     }
 
-    func handleURL(url: NSURL) -> Bool {
+    @discardableResult
+    func handleURL(_ url: URL) -> Bool {
         var querydict : [String: String] = [:]
 
         if let fragment = url.fragment {
-            for tuple in fragment.componentsSeparatedByString("&") {
-                let nv = tuple.componentsSeparatedByString("=") as [NSString]
+            for tuple in fragment.components(separatedBy: "&") {
+                let nv = tuple.components(separatedBy: "=") as [String]
 
                 switch (nv[0], nv[1]) {
                 case (let name, let value):
-                    querydict[name as! String] = value as? String
+                    querydict[name] = value
                 default:
                     break
                 }
@@ -125,13 +126,13 @@ class AppDelegate: UIResponder, UIApplicationDelegate, DirectoryViewControllerDe
         return false
     }
 
-    func logout() {
+    @IBAction func logout(_ sender: Any?) {
         token = nil
         deleteToken()
 
         let navVC = UINavigationController(rootViewController: LoginViewController(clientId: clientId))
         let nfsVC = NoFileSelectedViewController()
-        nfsVC.navigationItem.leftBarButtonItem = svc.displayModeButtonItem()
+        nfsVC.navigationItem.leftBarButtonItem = svc.displayModeButtonItem
         nfsVC.navigationItem.leftItemsSupplementBackButton = true
         let detailVC = UINavigationController(rootViewController: nfsVC)
         svc = UISplitViewController()
@@ -144,7 +145,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, DirectoryViewControllerDe
         if token != nil {
             if let rootDirectory = DirectoryViewController(disk: disk) {
                 rootDirectory.delegate = self
-                rootDirectory.navigationItem.leftBarButtonItem = UIBarButtonItem(title: "Logout", style: .Plain, target: self, action: "logout")
+                rootDirectory.navigationItem.leftBarButtonItem = UIBarButtonItem(title: "Logout", style: .plain, target: self, action: #selector(self.logout(_:)))
 
                 return rootDirectory
             }
@@ -155,8 +156,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate, DirectoryViewControllerDe
 }
 
 extension AppDelegate { // keychain related
-    private func saveToken(token: String) {
-        if let data = token.dataUsingEncoding(NSUTF8StringEncoding, allowLossyConversion: false) {
+    private func saveToken(_ token: String) {
+        if let data = token.data(using: .utf8, allowLossyConversion: false) {
 
             var keyChainQuery = NSMutableDictionary()
             keyChainQuery[kSecClass as NSString] = kSecClassGenericPassword
@@ -175,24 +176,18 @@ extension AppDelegate { // keychain related
         keyChainQuery[kSecMatchLimit as NSString] = kSecMatchLimitOne
         keyChainQuery[kSecUseOperationPrompt as NSString] = "Authenticate to log in!"
 
-        var extractedData: Unmanaged<AnyObject>? = nil
+        var extractedData: AnyObject?
 
-        if SecItemCopyMatching(keyChainQuery, &extractedData) != errSecSuccess {
+        guard SecItemCopyMatching(keyChainQuery, &extractedData) == errSecSuccess else {
             return nil
         }
-
-        let opaque = extractedData?.toOpaque()
-        let contentsOfKeychain: String?
-
-        if let opaque = opaque {
-            let retrievedData = Unmanaged<NSData>.fromOpaque(opaque).takeUnretainedValue()
-            // Convert the data retrieved from the keychain into a string
-            contentsOfKeychain = NSString(data: retrievedData, encoding: NSUTF8StringEncoding) as? String
-        } else {
-            contentsOfKeychain = nil
-        }
         
-        return contentsOfKeychain
+        switch extractedData {
+        case let data as Data:
+            return String(data: data, encoding: .utf8);
+        default:
+            return nil;
+        }
     }
 
     private func deleteToken() {

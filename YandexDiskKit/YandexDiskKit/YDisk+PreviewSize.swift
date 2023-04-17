@@ -29,7 +29,7 @@ import Foundation
 
 extension YandexDisk {
 
-    public enum PreviewSize : Printable {
+    public enum PreviewSize: CustomStringConvertible {
         case S
         case M
         case L

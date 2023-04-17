@@ -57,44 +57,51 @@ public func ==(l:YandexDisk.Path, r:YandexDisk.Path) -> Bool {
 
 extension YandexDisk {
 
-    public enum Path : Printable, Equatable {
+    public enum Path : Equatable, CustomStringConvertible {
         case App(String)
         case Disk(String)
         case Trash(String)
 
-        private static func stringWithoutTrainingSlash(path: String) -> String {
+        private static func stringWithoutTrainingSlash(_ path: String) -> String {
             if path.hasSuffix("/") {
-                return prefix(path, count(path)-1)
+                let index = path.index(before: path.endIndex);
+                return String( path[..<index] );
             } else {
                 return path
             }
         }
 
-        public static func appPathWithString(var path: String) -> YandexDisk.Path {
+        public static func appPathWithString(_ path: String) -> YandexDisk.Path {
+            var path = path;
             if path.hasPrefix("app:/") {
-                path = path[advance(path.startIndex, 5)..<path.endIndex]
+                let index = path.index(path.startIndex, offsetBy: 5)
+                path = String( path[index..<path.endIndex] );
             }
             path = stringWithoutTrainingSlash(path)
             return YandexDisk.Path.App(path)
         }
 
-        public static func diskPathWithString(var path: String) -> YandexDisk.Path {
+        public static func diskPathWithString(_ path: String) -> YandexDisk.Path {
+            var path = path;
             if path.hasPrefix("disk:/") {
-                path = path[advance(path.startIndex, 6)..<path.endIndex]
+                let index = path.index(path.startIndex, offsetBy: 6)
+                path = String( path[index..<path.endIndex] );
             }
             path = stringWithoutTrainingSlash(path)
             return YandexDisk.Path.Disk(path)
         }
 
-        public static func trashPathWithString(var path: String) -> YandexDisk.Path {
+        public static func trashPathWithString(_ path: String) -> YandexDisk.Path {
+            var path = path;
             if path.hasPrefix("trash:/") {
-                path = path[advance(path.startIndex, 7)..<path.endIndex]
+                let index = path.index(path.startIndex, offsetBy: 7)
+                path = String( path[index..<path.endIndex] );
             }
             path = stringWithoutTrainingSlash(path)
             return YandexDisk.Path.Trash(path)
         }
 
-        public static func pathWithString(path: String) -> YandexDisk.Path {
+        public static func pathWithString(_ path: String) -> YandexDisk.Path {
             switch path {
             case let path where path.hasPrefix("app:/"):
                 return appPathWithString(path)

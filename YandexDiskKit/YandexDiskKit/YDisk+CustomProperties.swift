@@ -31,7 +31,7 @@ extension YandexDisk {
 
     public enum PatchCustomPropertiesResult {
         case Done(YandexDiskResource)
-        case Failed(NSError!)
+        case Failed(Error)
     }
 
     /// Assign custom property to file or folder
@@ -48,7 +48,7 @@ extension YandexDisk {
     /// :returns: `PatchCustomPropertiesResult` future.
     ///
     /// API reference: **missing**
-    public func setCustomProperty(path:Path, name: String, value: AnyObject, handler:((result:PatchCustomPropertiesResult) -> Void)? = nil) -> Result<PatchCustomPropertiesResult> {
+    public func setCustomProperty(_ path:Path, name: String, value: AnyObject, handler:((PatchCustomPropertiesResult) -> Void)? = nil) -> Result<PatchCustomPropertiesResult> {
         return patchCustomProperties(path, properties: [name: value], handler: handler)
     }
 
@@ -62,7 +62,7 @@ extension YandexDisk {
     /// :returns: `PatchCustomPropertiesResult` future.
     ///
     /// API reference: **missing**
-    public func removeCustomProperty(path:Path, name: String, handler:((result:PatchCustomPropertiesResult) -> Void)? = nil) -> Result<PatchCustomPropertiesResult> {
+    public func removeCustomProperty(_ path:Path, name: String, handler:((PatchCustomPropertiesResult) -> Void)? = nil) -> Result<PatchCustomPropertiesResult> {
         return setCustomProperty(path, name: name, value: NSNull(), handler: handler)
     }
 
@@ -78,7 +78,8 @@ extension YandexDisk {
     /// :returns: `PatchCustomPropertiesResult` future.
     ///
     /// API reference: **missing**
-    public func patchCustomProperties(path:Path, var properties: NSDictionary, handler:((result:PatchCustomPropertiesResult) -> Void)? = nil) -> Result<PatchCustomPropertiesResult> {
+    public func patchCustomProperties(_ path:Path, properties: NSDictionary, handler:((PatchCustomPropertiesResult) -> Void)? = nil) -> Result<PatchCustomPropertiesResult> {
+        var properties = properties;
         let result = Result<PatchCustomPropertiesResult>(handler: handler)
 
         var url = "\(baseURL)/v1/disk/resources?path=\(path.toUrlEncodedString)"
@@ -88,29 +89,29 @@ extension YandexDisk {
         if properties["custom_properties"] == nil {
             properties = ["custom_properties": properties]
         }
-        var anyError: NSError?
-        let data = NSJSONSerialization.dataWithJSONObject(properties, options: NSJSONWritingOptions.PrettyPrinted, error: &anyError)
-        if anyError != nil {
-            error(anyError)
+        do {
+            let data = try JSONSerialization.data(withJSONObject: properties, options: [.prettyPrinted]);
+            session.jsonTaskWithURL(url, method: "PATCH", body: data, errorHandler: error) {
+                (jsonRoot, response)->Void in
+
+                let (href, method, templated) = YandexDisk.hrefMethodTemplatedWithDictionary(jsonRoot)
+
+                switch response.statusCode {
+                case 200:
+                    if let rootItem = SimpleResource.resourceFromDictionary(jsonRoot) {
+                        return result.set(.Done(rootItem))
+                    }
+                    fallthrough
+                default:
+                    return error(NSError(domain: "YDisk", code: response.statusCode, userInfo: ["response":response, "json":jsonRoot]))
+                }
+            }.resume()
+
             return result
         }
-
-        session.jsonTaskWithURL(url, method: "PATCH", body: data, errorHandler: error) {
-            (jsonRoot, response)->Void in
-
-            let (href, method, templated) = YandexDisk.hrefMethodTemplatedWithDictionary(jsonRoot)
-
-            switch response.statusCode {
-            case 200:
-                if let rootItem = SimpleResource.resourceFromDictionary(jsonRoot) {
-                    return result.set(.Done(rootItem))
-                }
-                fallthrough
-            default:
-                return error(NSError(domain: "YDisk", code: response.statusCode, userInfo: ["response":response, "json":jsonRoot]))
-            }
-        }.resume()
-
-        return result
+        catch (let err) {
+            error(err);
+            return result;
+        }
     }
 }

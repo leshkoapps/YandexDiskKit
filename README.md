@@ -131,7 +131,7 @@ I suggest you have a look at the source, or cmd-click on the ```import YandexDis
 
 ## Known limitations
 
-* Requires at least Xcode 6.3 beta with swift 1.2
+* Requires at least Xcode 10.2 with swift 5
 * The interface heavily depends on swift only features, so the framework is not useable from Obj-C. 
 * The ```fields``` parameter is not implemented.
 * The documentation is incomplete.

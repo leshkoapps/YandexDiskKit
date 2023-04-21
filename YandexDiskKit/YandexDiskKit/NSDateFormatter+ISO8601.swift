@@ -27,9 +27,9 @@
 
 import Foundation
 
-extension NSDateFormatter {
-    class func iso8601dateFormatter() -> NSDateFormatter {
-        let dateformatter = NSDateFormatter()
+extension DateFormatter {
+    class func iso8601dateFormatter() -> DateFormatter {
+        let dateformatter = DateFormatter()
         dateformatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ssZZZZ"
         return dateformatter
     }

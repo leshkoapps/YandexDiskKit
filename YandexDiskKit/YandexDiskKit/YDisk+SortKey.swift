@@ -29,14 +29,14 @@ import Foundation
 
 extension YandexDisk {
 
-    public enum SortKey : String, Printable {
+    public enum SortKey : String, CustomStringConvertible {
         case Name = "name"
         case Path = "path"
         case Created = "created"
         case Modified = "modified"
         case Size = "size"
 
-        /// Required by protocol Printable
+        /// Required by protocol CustomStringConvertible
         public var description: String {
             return self.rawValue
         }

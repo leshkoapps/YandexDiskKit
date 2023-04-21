@@ -34,7 +34,7 @@ extension YandexDisk {
         case Failed(NSError!)
     }
 
-    public enum MediaType : String, Printable {
+    public enum MediaType : String, CustomStringConvertible {
         case Audio = "audio"
         case Backup = "backup"
         case Book = "book"
@@ -55,7 +55,7 @@ extension YandexDisk {
         case Video = "video"
         case Web = "web"
 
-        /// Required by protocol Printable
+        /// Required by protocol CustomStringConvertible
         public var description: String {
             return self.rawValue
         }
@@ -73,34 +73,34 @@ extension YandexDisk {
     /// API reference:
     ///   `english http://api.yandex.com/disk/api/reference/recent-upload.xml`_,
     ///   `russian https://tech.yandex.ru/disk/api/reference/recent-upload-docpage/`_.
-    public func lastUploaded(limit:Int? = nil, type:MediaType? = nil, preview_size:PreviewSize?=nil, preview_crop:Bool?=nil, handler:((listing:LastUploadedResult) -> Void)? = nil) -> Result<LastUploadedResult> {
+    public func lastUploaded(limit:Int? = nil, type:MediaType? = nil, preview_size:PreviewSize?=nil, preview_crop:Bool?=nil, handler:((_ listing:LastUploadedResult) -> Void)? = nil) -> Result<LastUploadedResult> {
         let result = Result<LastUploadedResult>(handler: handler)
 
         var url = "\(baseURL)/v1/disk/resources/last-uploaded"
 
-        url.appendOptionalURLParameter("limit", value:limit)
-        url.appendOptionalURLParameter("media_type", value:type)
-        url.appendOptionalURLParameter("preview_size", value:preview_size)
-        url.appendOptionalURLParameter("preview_crop", value:preview_crop)
+        url.appendOptionalURLParameter(name: "limit", value:limit)
+        url.appendOptionalURLParameter(name: "media_type", value:type)
+        url.appendOptionalURLParameter(name: "preview_size", value:preview_size)
+        url.appendOptionalURLParameter(name: "preview_crop", value:preview_crop)
 
-        let error = { result.set(.Failed($0)) }
+        let error = { result.set(result: .Failed($0)) }
 
-        session.jsonTaskWithURL(url, errorHandler: error) {
+        session.jsonTaskWithURL(url: url, errorHandler: error) {
             (jsonRoot, response)->Void in
 
             switch response.statusCode {
             case 200:
 
-                let limit = (jsonRoot["limit"] as? NSNumber)?.integerValue ?? 0
-                if let elements = SimpleResource.resourcesFromArray(jsonRoot["items"] as? NSArray) {
-                    return result.set(.Listing(limit: limit, items: elements))
+                let limit = (jsonRoot["limit"] as? NSNumber)?.intValue ?? 0
+                if let elements = SimpleResource.resourcesFromArray(array: jsonRoot["items"] as? NSArray) {
+                    return result.set(result: .Listing(limit: limit, items: elements))
                 }
                 return error(NSError(domain: "YDisk", code: response.statusCode, userInfo: ["message":"incomplete JSON response", "json":jsonRoot]))
 
             default:
                 return error(NSError(domain: "YDisk", code: response.statusCode, userInfo: ["response":response]))
             }
-        }.resume()
+        }?.resume()
 
         return result
     }

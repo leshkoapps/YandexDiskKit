@@ -49,22 +49,22 @@ extension YandexDisk {
     /// :returns: `APIVersionResult` future.
     ///
     /// API reference: *undocumented*
-    public func apiVersion(handler:((result:APIVersionResult) -> Void)? = nil) -> Result<APIVersionResult> {
+    public func apiVersion(handler:((_ result:APIVersionResult) -> Void)? = nil) -> Result<APIVersionResult> {
         let result = Result<APIVersionResult>(handler: handler)
 
-        var url = "\(baseURL)/"
+        let url = "\(baseURL)/"
 
-        let error = { result.set(.Failed($0)) }
+        let error = { result.set(result: .Failed($0)) }
 
-        session.jsonTaskWithURL(url, errorHandler: error) {
+        session.jsonTaskWithURL(url: url, errorHandler: error) {
             (jsonRoot, response)->Void in
 
             switch response.statusCode {
             case 200:
                 if let build = jsonRoot["build"] as? String,
-                    version = jsonRoot["api_version"] as? String
+                   let version = jsonRoot["api_version"] as? String
                 {
-                    return result.set(.Done(build: build, version: version))
+                    return result.set(result: .Done(build: build, version: version))
                 } else {
                     return error(NSError(domain: "YDisk", code: response.statusCode, userInfo: ["response":response, "json":jsonRoot]))
                 }
@@ -72,7 +72,7 @@ extension YandexDisk {
             default:
                 return error(NSError(domain: "YDisk", code: response.statusCode, userInfo: ["response":response]))
             }
-        }.resume()
+        }?.resume()
 
         return result
     }

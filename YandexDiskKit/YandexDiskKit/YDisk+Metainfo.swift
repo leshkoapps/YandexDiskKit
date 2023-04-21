@@ -42,32 +42,32 @@ extension YandexDisk {
     /// API reference:
     ///   `english http://api.yandex.com/disk/api/reference/capacity.xml`_,
     ///   `russian https://tech.yandex.ru/disk/api/reference/capacity-docpage/`_.
-    public func metainfo(handler:((result:MetainfoResult) -> Void)? = nil) -> Result<MetainfoResult> {
+    public func metainfo(handler:((_ result:MetainfoResult) -> Void)? = nil) -> Result<MetainfoResult> {
         let result = Result<MetainfoResult>(handler: handler)
 
-        var url = "\(baseURL)/v1/disk/"
+        let url = "\(baseURL)/v1/disk/"
 
-        let error = { result.set(.Failed($0)) }
+        let error = { result.set(result: .Failed($0)) }
 
-        session.jsonTaskWithURL(url, errorHandler: error) {
+        session.jsonTaskWithURL(url: url, errorHandler: error) {
             (jsonRoot, response)->Void in
 
             switch response.statusCode {
             case 200:
                 if let system_folders_dict = jsonRoot["system_folders"] as? NSDictionary,
-                    total_space = (jsonRoot["total_space"] as? NSNumber)?.integerValue,
-                    used_space = (jsonRoot["used_space"] as? NSNumber)?.integerValue,
-                    trash_size = (jsonRoot["trash_size"] as? NSNumber)?.integerValue
+                   let total_space = (jsonRoot["total_space"] as? NSNumber)?.intValue,
+                   let used_space = (jsonRoot["used_space"] as? NSNumber)?.intValue,
+                   let trash_size = (jsonRoot["trash_size"] as? NSNumber)?.intValue
                 {
                     var system_folders = Dictionary<String, Path>()
                     for (key, value) in system_folders_dict {
                         if let key = key as? String,
-                            value = value as? String
+                           let value = value as? String
                         {
-                            system_folders[key] = Path.pathWithString(value)
+                            system_folders[key] = Path.pathWithString(path: value)
                         }
                     }
-                    return result.set(.Done(total_space:total_space, used_space:used_space, trash_size:trash_size, system_folders:system_folders))
+                    return result.set(result: .Done(total_space:total_space, used_space:used_space, trash_size:trash_size, system_folders:system_folders))
                 } else {
                     fallthrough
                 }
@@ -75,7 +75,7 @@ extension YandexDisk {
             default:
                 return error(NSError(domain: "YDisk", code: response.statusCode, userInfo: ["response":response, "json":jsonRoot]))
             }
-        }.resume()
+        }?.resume()
 
         return result
     }

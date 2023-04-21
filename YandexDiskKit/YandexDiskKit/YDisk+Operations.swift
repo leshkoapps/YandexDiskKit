@@ -45,9 +45,9 @@ extension YandexDisk {
     /// API reference:
     ///   `english http://api.yandex.com/disk/api/reference/operations.xml`_,
     ///   `russian https://tech.yandex.ru/disk/api/reference/operations-docpage/`_.
-    public func operationStatusWithId(opId:String, handler:((result:OperationsResult) -> Void)? = nil) -> Result<OperationsResult> {
-        var requestUrl = "\(baseURL)/v1/disk/operations/\(opId)"
-        return operationStatusWithHref(requestUrl, handler: handler)
+    public func operationStatusWithId(opId:String, handler:((_ result:OperationsResult) -> Void)? = nil) -> Result<OperationsResult> {
+        let requestUrl = "\(baseURL)/v1/disk/operations/\(opId)"
+        return operationStatusWithHref(href: requestUrl, handler: handler)
     }
 
     /// Operation status.
@@ -61,25 +61,25 @@ extension YandexDisk {
     /// API reference:
     ///   `english http://api.yandex.com/disk/api/reference/operations.xml`_,
     ///   `russian https://tech.yandex.ru/disk/api/reference/operations-docpage/`_.
-    public func operationStatusWithHref(href:String, handler:((result:OperationsResult) -> Void)? = nil) -> Result<OperationsResult> {
+    public func operationStatusWithHref(href:String, handler:((_ result:OperationsResult) -> Void)? = nil) -> Result<OperationsResult> {
         let result = Result<OperationsResult>(handler: handler)
 
-        let error = { result.set(.Failed($0)) }
+        let error = { result.set(result: .Failed($0)) }
 
-        session.jsonTaskWithURL(href, errorHandler: error) {
+        session.jsonTaskWithURL(url: href, errorHandler: error) {
             (jsonRoot, response)->Void in
 
             switch response.statusCode {
             case 200:
                 if let str = jsonRoot["status"] as? String {
-                    return result.set(.Status(str))
+                    return result.set(result: .Status(str))
                 } else {
                     return error(NSError(domain: "YDisk", code: response.statusCode, userInfo: ["message":"Missing 'status' in json reply."]))
                 }
             default:
                 return error(NSError(domain: "YDisk", code: response.statusCode, userInfo: ["response":response]))
             }
-        }.resume()
+        }?.resume()
 
         return result
     }

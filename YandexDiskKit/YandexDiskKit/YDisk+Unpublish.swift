@@ -43,24 +43,24 @@ extension YandexDisk {
     /// API reference:
     ///   `english http://api.yandex.com/disk/api/reference/publish.xml`_,
     ///   `russian https://tech.yandex.ru/disk/api/reference/publish-docpage/`_.
-    public func unpublishPath(path:Path, handler:((result:UnpublishResult) -> Void)? = nil) -> Result<UnpublishResult> {
+    public func unpublishPath(path:Path, handler:((_ result:UnpublishResult) -> Void)? = nil) -> Result<UnpublishResult> {
         let result = Result<UnpublishResult>(handler: handler)
 
-        var url = "\(baseURL)/v1/disk/resources/unpublish/?path=\(path.toUrlEncodedString)"
+        let url = "\(baseURL)/v1/disk/resources/unpublish/?path=\(path.toUrlEncodedString)"
 
-        let error = { result.set(.Failed($0)) }
+        let error = { result.set(result: .Failed($0)) }
 
-        session.jsonTaskWithURL(url, method:"PUT", errorHandler: error) {
+        session.jsonTaskWithURL(url: url, method:"PUT", errorHandler: error) {
             (jsonRoot, response)->Void in
 
             switch response.statusCode {
             case 200:
-                return result.set(.Done)
+                return result.set(result: .Done)
 
             default:
                 return error(NSError(domain: "YDisk", code: response.statusCode, userInfo: ["response":response]))
             }
-        }.resume()
+        }?.resume()
 
         return result
     }

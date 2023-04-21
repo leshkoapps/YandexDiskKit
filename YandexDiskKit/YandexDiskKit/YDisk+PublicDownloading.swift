@@ -40,13 +40,13 @@ extension YandexDisk {
     /// API reference:
     ///   `english http://api.yandex.com/disk/api/reference/public.xml`_,
     ///   `russian https://tech.yandex.ru/disk/api/reference/public-docpage/`_.
-    public func downloadPublic(key public_key:String, path:String?=nil, toURL:NSURL, handler:((result:DownloadResult) -> Void)? = nil) -> Result<DownloadResult> {
+    public func downloadPublic(key public_key:String, path:String?=nil, toURL:NSURL, handler:((_ result:DownloadResult) -> Void)? = nil) -> Result<DownloadResult> {
 
         var url = "\(baseURL)/v1/disk/public-resources/download/?public_key=\(public_key.urlEncoded())"
 
-        url.appendOptionalURLParameter("path", value:path)
+        url.appendOptionalURLParameter(name: "path", value:path)
 
-        return _downloadURL(url, toURL: toURL, handler: handler)
+        return _downloadURL(url: url, toURL: toURL, handler: handler)
     }
     
 }

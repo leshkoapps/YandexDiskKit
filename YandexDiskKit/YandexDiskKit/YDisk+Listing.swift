@@ -49,7 +49,7 @@ extension YandexDisk {
     /// API reference:
     ///   `english http://api.yandex.com/disk/api/reference/meta.xml`_,
     ///   `russian https://tech.yandex.ru/disk/api/reference/meta-docpage/`_.
-    public func listPath(path:Path, sort:SortKey?=nil, limit:Int?=nil, offset:Int?=nil, preview_size:PreviewSize?=nil, preview_crop:Bool?=nil, handler:((listing:ListingResult) -> Void)? = nil) -> Result<ListingResult> {
+    public func listPath(path:Path, sort:SortKey?=nil, limit:Int?=nil, offset:Int?=nil, preview_size:PreviewSize?=nil, preview_crop:Bool?=nil, handler:((_ listing:ListingResult) -> Void)? = nil) -> Result<ListingResult> {
 
         var url : String
 
@@ -60,48 +60,48 @@ extension YandexDisk {
             url = "\(baseURL)/v1/disk/trash/resources/?path=\(path.toUrlEncodedString)"
         }
 
-        url.appendOptionalURLParameter("sort", value:sort)
-        url.appendOptionalURLParameter("limit", value:limit)
-        url.appendOptionalURLParameter("offset", value:offset)
-        url.appendOptionalURLParameter("preview_size", value:preview_size)
-        url.appendOptionalURLParameter("preview_crop", value:preview_crop)
+        url.appendOptionalURLParameter(name: "sort", value:sort)
+        url.appendOptionalURLParameter(name: "limit", value:limit)
+        url.appendOptionalURLParameter(name: "offset", value:offset)
+        url.appendOptionalURLParameter(name: "preview_size", value:preview_size)
+        url.appendOptionalURLParameter(name: "preview_crop", value:preview_crop)
 
-        return _listURL(url, handler:handler)
+        return _listURL(url: url, handler:handler)
     }
 
-    func _listURL(url:String, handler:((listing:ListingResult) -> Void)? = nil) -> Result<ListingResult> {
+    func _listURL(url:String, handler:((_ listing:ListingResult) -> Void)? = nil) -> Result<ListingResult> {
         let result = Result<ListingResult>(handler: handler)
 
-        let error = { result.set(.Failed($0)) }
+        let error = { result.set(result: .Failed($0)) }
 
-        session.jsonTaskWithURL(url, errorHandler: error) {
+        session.jsonTaskWithURL(url: url, errorHandler: error) {
             (jsonRoot, response)->Void in
 
             switch response.statusCode {
             case 200:
-                var rootItem = SimpleResource.resourceFromDictionary(jsonRoot)
+                let item = SimpleResource.resourceFromDictionary(properties: jsonRoot)
 
-                if let rootItem = rootItem {
+                if let rootItem = item {
                     switch rootItem.type {
                     case .File:
-                        return result.set(.File(rootItem))
+                        return result.set(result: .File(rootItem))
 
                     case .Directory:
 
                         if let embedded = jsonRoot["_embedded"] as? NSDictionary,
-                            path_str = embedded["path"] as? String,
-                            sort_str = embedded["sort"] as? String,
-                            limit_nr = embedded["limit"] as? NSNumber,
-                            offset_nr = embedded["offset"] as? NSNumber,
-                            total_nr = embedded["total"] as? NSNumber,
-                            items = SimpleResource.resourcesFromArray(embedded["items"] as? NSArray)
+                           let path_str = embedded["path"] as? String,
+                           let sort_str = embedded["sort"] as? String,
+                           let limit_nr = embedded["limit"] as? NSNumber,
+                           let offset_nr = embedded["offset"] as? NSNumber,
+                           let total_nr = embedded["total"] as? NSNumber,
+                           let items = SimpleResource.resourcesFromArray(array: embedded["items"] as? NSArray)
                         {
-                            let path    = Path.pathWithString(path_str)
-                            let limit   = limit_nr.integerValue
-                            let offset  = offset_nr.integerValue
-                            let total   = total_nr.integerValue
+                            let path    = Path.pathWithString(path: path_str)
+                            let limit   = limit_nr.intValue
+                            let offset  = offset_nr.intValue
+                            let total   = total_nr.intValue
                             let sort    = SortKey(rawValue: sort_str)
-                            return result.set(.Listing(dir: rootItem, limit: limit, offset: offset, total: total, path: path, sort: sort, items: items))
+                            return result.set(result: .Listing(dir: rootItem, limit: limit, offset: offset, total: total, path: path, sort: sort, items: items))
                         } else {
                             return error(NSError(domain: "YDisk", code: response.statusCode, userInfo:
                                 ["message":"incomplete JSON response", "json":jsonRoot]))
@@ -115,7 +115,7 @@ extension YandexDisk {
             default:
                 return error(NSError(domain: "YDisk", code: response.statusCode, userInfo: ["response":response]))
             }
-        }.resume()
+        }?.resume()
 
         return result
     }

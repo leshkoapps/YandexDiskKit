@@ -52,26 +52,28 @@ public class YandexDisk {
             "User-Agent"    :   "Yandex Disk swift SDK"]
     }
 
-    public lazy var session : NSURLSession = {
-        let sessionConfig = NSURLSessionConfiguration.defaultSessionConfiguration()
-        sessionConfig.HTTPAdditionalHeaders = self.additionalHTTPHeaders
-        sessionConfig.HTTPShouldUsePipelining = true
+    public lazy var session : URLSession = {
+        let sessionConfig = URLSessionConfiguration.default
+        sessionConfig.httpAdditionalHeaders = self.additionalHTTPHeaders
+        sessionConfig.httpShouldUsePipelining = true
 
-        let _session = NSURLSession(configuration: sessionConfig)
+        let _session = URLSession(configuration: sessionConfig)
         return _session
     }()
 
-    private var _transferSession : NSURLSession?
-    public var transferSession : NSURLSession {
+    private var _transferSession : URLSession?
+    public var transferSession : URLSession {
         if _transferSession != nil {
             return _transferSession!
         } else if transferSessionIdentifier != nil && transferSessionDelegate != nil {
-            let transferSessionConfig = NSURLSessionConfiguration.backgroundSessionConfigurationWithIdentifier(transferSessionIdentifier!)
-            transferSessionConfig.HTTPAdditionalHeaders = additionalHTTPHeaders
-            transferSessionConfig.HTTPShouldUsePipelining = true
+            let transferSessionConfig = URLSessionConfiguration.background(withIdentifier: transferSessionIdentifier!)
+            
+            transferSessionConfig.httpAdditionalHeaders = additionalHTTPHeaders
+            transferSessionConfig.httpShouldUsePipelining = true
 
-            let queue = transferSessionQueue ?? NSOperationQueue.mainQueue()
-            _transferSession = NSURLSession(configuration: transferSessionConfig, delegate: transferSessionDelegate, delegateQueue: queue)
+            let queue = transferSessionQueue ?? OperationQueue.main
+            _transferSession = URLSession(configuration: transferSessionConfig, delegate: transferSessionDelegate, delegateQueue: queue)
+            
             return _transferSession!
         } else {
             return session
@@ -79,8 +81,8 @@ public class YandexDisk {
     }
 
     public var transferSessionIdentifier: String?
-    public var transferSessionDelegate: NSURLSessionDownloadDelegate?
-    public var transferSessionQueue : NSOperationQueue?
+    public var transferSessionDelegate: URLSessionDownloadDelegate?
+    public var transferSessionQueue : OperationQueue?
 
     public init(token:String) {
         self.token = token

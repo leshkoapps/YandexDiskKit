@@ -48,8 +48,8 @@ extension YandexDisk {
     /// :returns: `PatchCustomPropertiesResult` future.
     ///
     /// API reference: **missing**
-    public func setCustomProperty(path:Path, name: String, value: AnyObject, handler:((result:PatchCustomPropertiesResult) -> Void)? = nil) -> Result<PatchCustomPropertiesResult> {
-        return patchCustomProperties(path, properties: [name: value], handler: handler)
+    public func setCustomProperty(path:Path, name: String, value: AnyObject, handler:((_ result:PatchCustomPropertiesResult) -> Void)? = nil) -> Result<PatchCustomPropertiesResult> {
+        return patchCustomProperties(path: path, properties: [name: value], handler: handler)
     }
 
     /// Remove custom property from file or folder
@@ -62,8 +62,8 @@ extension YandexDisk {
     /// :returns: `PatchCustomPropertiesResult` future.
     ///
     /// API reference: **missing**
-    public func removeCustomProperty(path:Path, name: String, handler:((result:PatchCustomPropertiesResult) -> Void)? = nil) -> Result<PatchCustomPropertiesResult> {
-        return setCustomProperty(path, name: name, value: NSNull(), handler: handler)
+    public func removeCustomProperty(path:Path, name: String, handler:((_ result:PatchCustomPropertiesResult) -> Void)? = nil) -> Result<PatchCustomPropertiesResult> {
+        return setCustomProperty(path: path, name: name, value: NSNull(), handler: handler)
     }
 
     /// Patch custom property of file or folder
@@ -78,38 +78,32 @@ extension YandexDisk {
     /// :returns: `PatchCustomPropertiesResult` future.
     ///
     /// API reference: **missing**
-    public func patchCustomProperties(path:Path, var properties: NSDictionary, handler:((result:PatchCustomPropertiesResult) -> Void)? = nil) -> Result<PatchCustomPropertiesResult> {
+    public func patchCustomProperties(path:Path, properties: NSDictionary?, handler:((_ result:PatchCustomPropertiesResult) -> Void)? = nil) -> Result<PatchCustomPropertiesResult> {
         let result = Result<PatchCustomPropertiesResult>(handler: handler)
 
-        var url = "\(baseURL)/v1/disk/resources?path=\(path.toUrlEncodedString)"
+        let url = "\(baseURL)/v1/disk/resources?path=\(path.toUrlEncodedString)"
 
-        let error = { result.set(.Failed($0)) }
+        let error = { result.set(result: .Failed($0)) }
 
-        if properties["custom_properties"] == nil {
-            properties = ["custom_properties": properties]
-        }
-        var anyError: NSError?
-        let data = NSJSONSerialization.dataWithJSONObject(properties, options: NSJSONWritingOptions.PrettyPrinted, error: &anyError)
-        if anyError != nil {
-            error(anyError)
-            return result
+        var data : NSData?
+        if let properties = properties {
+            let jsonProperties = ["custom_properties": properties]
+            data = try? JSONSerialization.data(withJSONObject: jsonProperties, options: JSONSerialization.WritingOptions.prettyPrinted) as NSData?
         }
 
-        session.jsonTaskWithURL(url, method: "PATCH", body: data, errorHandler: error) {
+        session.jsonTaskWithURL(url: url, method: "PATCH", body: data, errorHandler: error) {
             (jsonRoot, response)->Void in
-
-            let (href, method, templated) = YandexDisk.hrefMethodTemplatedWithDictionary(jsonRoot)
 
             switch response.statusCode {
             case 200:
-                if let rootItem = SimpleResource.resourceFromDictionary(jsonRoot) {
-                    return result.set(.Done(rootItem))
+                if let rootItem = SimpleResource.resourceFromDictionary(properties: jsonRoot) {
+                    return result.set(result: .Done(rootItem))
                 }
                 fallthrough
             default:
                 return error(NSError(domain: "YDisk", code: response.statusCode, userInfo: ["response":response, "json":jsonRoot]))
             }
-        }.resume()
+        }?.resume()
 
         return result
     }

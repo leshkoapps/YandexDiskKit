@@ -45,24 +45,25 @@ extension YandexDisk {
     /// API reference:
     ///   `english http://api.yandex.com/disk/api/reference/create-folder.xml`_,
     ///   `russian https://tech.yandex.ru/disk/api/reference/create-folder-docpage/`_.
-    public func makeFolderAtPath(path:Path, handler:((result:MakeFolderResult) -> Void)? = nil) -> Result<MakeFolderResult> {
+    public func makeFolderAtPath(path:Path, handler:((_ result:MakeFolderResult) -> Void)? = nil) -> Result<MakeFolderResult> {
         let result = Result<MakeFolderResult>(handler: handler)
 
-        var url = "\(baseURL)/v1/disk/resources?path=\(path.toUrlEncodedString)"
+        let url = "\(baseURL)/v1/disk/resources?path=\(path.toUrlEncodedString)"
 
-        let error = { result.set(.Failed($0)) }
+        let error = { result.set(result: .Failed($0)) }
 
-        session.jsonTaskWithURL(url, method:"PUT", errorHandler: error) {
+        session.jsonTaskWithURL(url: url, method:"PUT", errorHandler: error) {
             (jsonRoot, response)->Void in
 
             switch response.statusCode {
             case 201:
-                return result.set(.Created(YandexDisk.hrefMethodTemplatedWithDictionary(jsonRoot)))
+                let (href, method, templated) = YandexDisk.hrefMethodTemplatedWithDictionary(dict: jsonRoot)
+                return result.set(result: .Created(href:href, method:method, templated:templated))
 
             default:
                 return error(NSError(domain: "YDisk", code: response.statusCode, userInfo: ["response":response]))
             }
-        }.resume()
+        }?.resume()
 
         return result
     }

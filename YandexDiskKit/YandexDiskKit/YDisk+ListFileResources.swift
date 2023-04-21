@@ -48,31 +48,31 @@ extension YandexDisk {
     /// API reference:
     ///   `english http://api.yandex.com/disk/api/reference/all-files.xml`_,
     ///   `russian https://tech.yandex.ru/disk/api/reference/all-files-docpage/`_.
-    public func listFileResources(limit:Int?=nil, offset:Int?=nil, media_type:String?=nil, preview_size:PreviewSize?=nil, preview_crop:Bool?=nil, sort:SortKey?=nil, handler:((listing:FileResourceListingResult) -> Void)? = nil) -> Result<FileResourceListingResult> {
+    public func listFileResources(limit:Int?=nil, offset:Int?=nil, media_type:String?=nil, preview_size:PreviewSize?=nil, preview_crop:Bool?=nil, sort:SortKey?=nil, handler:((_ listing:FileResourceListingResult) -> Void)? = nil) -> Result<FileResourceListingResult> {
         let result = Result<FileResourceListingResult>(handler: handler)
 
         var url = "\(baseURL)/v1/disk/resources/files"
 
-        url.appendOptionalURLParameter("limit", value:limit)
-        url.appendOptionalURLParameter("media_type", value:media_type)
-        url.appendOptionalURLParameter("offset", value:offset)
-        url.appendOptionalURLParameter("preview_crop", value:preview_crop)
-        url.appendOptionalURLParameter("preview_size", value:preview_size)
-        url.appendOptionalURLParameter("sort", value:sort)
+        url.appendOptionalURLParameter(name: "limit", value:limit)
+        url.appendOptionalURLParameter(name: "media_type", value:media_type)
+        url.appendOptionalURLParameter(name: "offset", value:offset)
+        url.appendOptionalURLParameter(name: "preview_crop", value:preview_crop)
+        url.appendOptionalURLParameter(name: "preview_size", value:preview_size)
+        url.appendOptionalURLParameter(name: "sort", value:sort)
 
-        let error = { result.set(.Failed($0)) }
+        let error = { result.set(result: .Failed($0)) }
 
-        session.jsonTaskWithURL(url, errorHandler: error) {
+        session.jsonTaskWithURL(url: url, errorHandler: error) {
             (jsonRoot, response)->Void in
 
             switch response.statusCode {
             case 200:
-                if let items = SimpleResource.resourcesFromArray(jsonRoot["items"] as? NSArray)
+                if let items = SimpleResource.resourcesFromArray(array: jsonRoot["items"] as? NSArray)
                 {
-                    let limit = (jsonRoot["limit"] as? NSNumber)?.integerValue
-                    let offset = (jsonRoot["offset"] as? NSNumber)?.integerValue
+                    let limit = (jsonRoot["limit"] as? NSNumber)?.intValue
+                    let offset = (jsonRoot["offset"] as? NSNumber)?.intValue
 
-                    return result.set(.Listing(items: items, limit: limit, offset: offset))
+                    return result.set(result: .Listing(items: items, limit: limit, offset: offset))
                 } else {
                     return error(NSError(domain: "YDisk", code: response.statusCode, userInfo:
                         ["message":"incomplete JSON response", "json":jsonRoot]))
@@ -80,7 +80,7 @@ extension YandexDisk {
             default:
                 return error(NSError(domain: "YDisk", code: response.statusCode, userInfo: ["response":response]))
             }
-        }.resume()
+        }?.resume()
 
         return result
     }

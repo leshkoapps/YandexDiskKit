@@ -31,16 +31,16 @@ class LoginViewController: UIViewController {
 
     var clientId = ""
 
-    required init(coder aDecoder: NSCoder) {
+    required init?(coder aDecoder: NSCoder) {
         super.init(coder: aDecoder)
     }
 
-    override init(nibName nibNameOrNil: String!, bundle nibBundleOrNil: NSBundle!) {
+    override init(nibName nibNameOrNil: String!, bundle nibBundleOrNil: Bundle!) {
         super.init(nibName: nibNameOrNil, bundle: nibBundleOrNil)
     }
 
     internal convenience init(clientId: String) {
-        self.init(nibName: "LoginViewController", bundle: NSBundle(forClass: LoginViewController.self))
+        self.init(nibName: "LoginViewController", bundle: Bundle(for: LoginViewController.self))
         title = "Login"
         self.clientId = clientId
     }
@@ -51,7 +51,7 @@ class LoginViewController: UIViewController {
         let urlstr = "https://oauth.yandex.ru/authorize?response_type=\(response_type)&client_id=\(clientId)"
 
         if let url = NSURL(string: urlstr) {
-            UIApplication.sharedApplication().openURL(url)
+            UIApplication.shared.open(url as URL, completionHandler: nil)
         }
     }
 

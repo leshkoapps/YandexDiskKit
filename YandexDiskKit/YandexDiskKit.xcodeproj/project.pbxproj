@@ -38,6 +38,7 @@
 		0FD8FDC31A94926200681A6D /* YDisk+PreviewSize.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0FD8FDC21A94926200681A6D /* YDisk+PreviewSize.swift */; };
 		0FD8FDC41A9492CB00681A6D /* YDisk+ListPublicResources.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0F95A0D91A8F7F6500C902B2 /* YDisk+ListPublicResources.swift */; };
 		0FD8FDC61A9685DB00681A6D /* YDisk+CustomProperties.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0FD8FDC51A9685DB00681A6D /* YDisk+CustomProperties.swift */; };
+		AC42FB8E29F341F3003457B2 /* URLQueryItem+YDisk.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC42FB8D29F341F3003457B2 /* URLQueryItem+YDisk.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -74,6 +75,7 @@
 		0F95A0DB1A8F8A9700C902B2 /* YDisk+ListFileResources.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "YDisk+ListFileResources.swift"; sourceTree = "<group>"; };
 		0FD8FDC21A94926200681A6D /* YDisk+PreviewSize.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "YDisk+PreviewSize.swift"; sourceTree = "<group>"; };
 		0FD8FDC51A9685DB00681A6D /* YDisk+CustomProperties.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "YDisk+CustomProperties.swift"; sourceTree = "<group>"; };
+		AC42FB8D29F341F3003457B2 /* URLQueryItem+YDisk.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "URLQueryItem+YDisk.swift"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -130,6 +132,7 @@
 				0F0551EC1A25989B00E79953 /* NSDateFormatter+ISO8601.swift */,
 				0F0551ED1A25989B00E79953 /* NSURLSession+YDisk.swift */,
 				0F0551EE1A25989B00E79953 /* String+YDisk.swift */,
+				AC42FB8D29F341F3003457B2 /* URLQueryItem+YDisk.swift */,
 			);
 			name = "System Extensions";
 			sourceTree = "<group>";
@@ -258,6 +261,7 @@
 				0F16AC271A9B4BF00067E55E /* YDisk+SortKey.swift in Sources */,
 				0F0551F11A25989B00E79953 /* NSURLSession+YDisk.swift in Sources */,
 				0FD8FDC41A9492CB00681A6D /* YDisk+ListPublicResources.swift in Sources */,
+				AC42FB8E29F341F3003457B2 /* URLQueryItem+YDisk.swift in Sources */,
 				0F05522D1A2598F400E79953 /* YDisk+Unpublish.swift in Sources */,
 				0F0552271A2598F400E79953 /* YDisk+PublicSave.swift in Sources */,
 				0F05521F1A2598F400E79953 /* YDisk+Operations.swift in Sources */,

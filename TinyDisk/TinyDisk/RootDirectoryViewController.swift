@@ -7,20 +7,38 @@
 //
 
 import UIKit;
+import YandexDiskKit;
 
+
+private enum DiskPath: String {
+    case files;
+    case trash;
+    case app;
+}
+
+private extension DiskPath {
+    
+    var path: YandexDisk.Path {
+        switch self {
+        case .files:
+            return .Disk("");
+        case .app:
+            return .App("");
+        case .trash:
+            return .Trash("");
+        }
+    }
+    
+}
 
 class RootDirectoryViewController: DirectoryViewController {
+    
+    @IBInspectable var diskContainer: String = "files";
 
     override func viewDidLoad() {
         self.disk = (UIApplication.shared.delegate as? AppDelegate)?.disk;
+        self.path = DiskPath(rawValue: self.diskContainer)?.path;
         super.viewDidLoad();
-    }
-    
-    @IBAction func logoutClick(_ sender: Any) {
-        guard let delegate = UIApplication.shared.delegate as? AppDelegate else {
-            return;
-        }
-        delegate.logout();
     }
 
 }

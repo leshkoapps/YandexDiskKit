@@ -89,7 +89,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         return true;
     }
 
-    func logout() {
+    @IBAction func logoutClick(_ sender: Any) {
         self.token = nil;
         self.deleteToken();
         let storyboard = UIStoryboard(name: "Login", bundle: nil);

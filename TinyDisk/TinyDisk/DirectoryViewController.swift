@@ -32,14 +32,19 @@ import YandexDiskKit
 public class DirectoryViewController: UITableViewController {
 
     var disk: YandexDisk?
-    var dirItem: YandexDiskResource?
+    var path: YandexDisk.Path?;
+    var dirItem: YandexDiskResource? {
+        didSet {
+            self.path = self.dirItem?.path;
+        }
+    }
     var entries: [YandexDiskResource?] = []
 
     @IBAction func refreshClick(_ sender: UIRefreshControl?) -> Void {
         guard let disk = self.disk else {
             return;
         }
-        let ownPath = self.dirItem?.path ?? YandexDisk.Path.Disk("");
+        let ownPath = self.path ?? YandexDisk.Path.Disk("");
         let _ = disk.listPath(ownPath, preview_size:.L, handler: self.listHandler);
     }
 
@@ -82,16 +87,16 @@ public class DirectoryViewController: UITableViewController {
     }
 
     func refreshTitle() {
-        guard let pathListing = self.dirItem else {
-            self.title = "Tiny Disk";
+        guard let string = self.path?.description,
+              let index = string.lastIndex(of: "/")
+        else {
             return;
         }
-        let string = pathListing.path.description;
-        if let index = string.lastIndex(of: "/") {
-            self.title = String( string[string.index(after: index)..<string.endIndex] );
-        } else {
-            self.title = string;
+        let next_index = string.index(after: index);
+        guard next_index != string.endIndex else {
+            return;
         }
+        self.title = String( string[next_index..<string.endIndex] );
     }
 
     func unpublishAction(action: UITableViewRowAction, indexPath: IndexPath) {
@@ -112,6 +117,17 @@ public class DirectoryViewController: UITableViewController {
             return;
         }
         let _ = disk.publishPath(entry.path) { _ in
+            self.refreshClick(nil);
+        }
+    }
+    
+    func restoreAction(action: UITableViewRowAction, indexPath: IndexPath) {
+        guard let entry = self.entries[indexPath.row],
+              let disk = self.disk
+        else {
+            return;
+        }
+        let _ = disk.restorePath(entry.path) { result in
             self.refreshClick(nil);
         }
     }
@@ -226,14 +242,21 @@ extension DirectoryViewController {
         guard let entry = entries[indexPath.row] else {
             return [deleteAction];
         }
-        if entry.public_url != nil {
-            let unpublishAction = UITableViewRowAction(style: .default, title: "Unpublish", handler: self.unpublishAction);
-            unpublishAction.backgroundColor = UIColor.orange
-            return [deleteAction, unpublishAction]
-        } else {
-            let publishAction = UITableViewRowAction(style: .default, title: "Publish", handler: self.publishAction);
-            publishAction.backgroundColor = UIColor.green
-            return [deleteAction, publishAction]
+        switch entry.path {
+        case .Trash:
+            let restoreAction = UITableViewRowAction(style: .default, title: "Restore", handler: self.restoreAction);
+            restoreAction.backgroundColor = UIColor.green;
+            return [deleteAction, restoreAction];
+        default:
+            if entry.public_url != nil {
+                let unpublishAction = UITableViewRowAction(style: .default, title: "Unpublish", handler: self.unpublishAction);
+                unpublishAction.backgroundColor = UIColor.orange
+                return [deleteAction, unpublishAction]
+            } else {
+                let publishAction = UITableViewRowAction(style: .default, title: "Publish", handler: self.publishAction);
+                publishAction.backgroundColor = UIColor.green
+                return [deleteAction, publishAction]
+            }
         }
     }
 

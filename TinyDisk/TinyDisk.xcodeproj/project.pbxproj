@@ -13,6 +13,7 @@
 		0F0551821A2595B800E79953 /* NoFileSelectedViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0F05517E1A2595B800E79953 /* NoFileSelectedViewController.swift */; };
 		0F05519A1A25969C00E79953 /* DirectoryViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0F0551931A25969C00E79953 /* DirectoryViewController.swift */; };
 		0F05519B1A25969C00E79953 /* ItemViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0F0551941A25969C00E79953 /* ItemViewController.swift */; };
+		BD678A8F29F16DC9009030F9 /* TrashDirectoryViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = BD678A8E29F16DC9009030F9 /* TrashDirectoryViewController.swift */; };
 		BD762FA929EDBD8700132C97 /* Login.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = BD762FA829EDBCFD00132C97 /* Login.storyboard */; };
 		BD762FAB29EDBF1000132C97 /* config.swift in Sources */ = {isa = PBXBuildFile; fileRef = BD762FAA29EDBF1000132C97 /* config.swift */; };
 		BD762FAE29EDF99B00132C97 /* RootDirectoryViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = BD762FAD29EDF99B00132C97 /* RootDirectoryViewController.swift */; };
@@ -62,6 +63,7 @@
 		0F05517E1A2595B800E79953 /* NoFileSelectedViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NoFileSelectedViewController.swift; sourceTree = "<group>"; };
 		0F0551931A25969C00E79953 /* DirectoryViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DirectoryViewController.swift; sourceTree = "<group>"; };
 		0F0551941A25969C00E79953 /* ItemViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ItemViewController.swift; sourceTree = "<group>"; };
+		BD678A8E29F16DC9009030F9 /* TrashDirectoryViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TrashDirectoryViewController.swift; sourceTree = "<group>"; };
 		BD762FA729EDBCFD00132C97 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Login.storyboard; sourceTree = "<group>"; };
 		BD762FAA29EDBF1000132C97 /* config.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = config.swift; sourceTree = "<group>"; };
 		BD762FAD29EDF99B00132C97 /* RootDirectoryViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RootDirectoryViewController.swift; sourceTree = "<group>"; };
@@ -128,6 +130,7 @@
 				0F0551931A25969C00E79953 /* DirectoryViewController.swift */,
 				0F0551941A25969C00E79953 /* ItemViewController.swift */,
 				0F05517E1A2595B800E79953 /* NoFileSelectedViewController.swift */,
+				BD678A8E29F16DC9009030F9 /* TrashDirectoryViewController.swift */,
 				BD8F520929EE6AA300B6FC55 /* Main.storyboard */,
 				BD762FA829EDBCFD00132C97 /* Login.storyboard */,
 				BD8F520C29EE6AB000B6FC55 /* LaunchScreen.storyboard */,
@@ -247,6 +250,7 @@
 				BD762FAB29EDBF1000132C97 /* config.swift in Sources */,
 				0F0551821A2595B800E79953 /* NoFileSelectedViewController.swift in Sources */,
 				0F05519B1A25969C00E79953 /* ItemViewController.swift in Sources */,
+				BD678A8F29F16DC9009030F9 /* TrashDirectoryViewController.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

@@ -31,20 +31,15 @@ extension String {
 
     func urlEncoded() -> String {
         let charactersToEscape = "!*'();:@&=+$,/?%#[]\" "
-        let allowedCharacters = NSCharacterSet(charactersIn: charactersToEscape).inverted
+        let allowedCharacters = CharacterSet(charactersIn: charactersToEscape).inverted
         return self.addingPercentEncoding(withAllowedCharacters: allowedCharacters) ?? self
     }
 
-    mutating func appendOptionalURLParameter<T>(name: String, value: T?) {
+    mutating func appendOptionalURLParameter<T>(_ name: String, value: T?) {
         if let value = value {
             let seperator = self.range(of:"?") == nil ? "?" : "&"
-            self = self + "\(seperator)\(name)=\(value)"
+
+            self.insert(contentsOf: "\(seperator)\(name)=\(value)", at: self.endIndex);
         }
     }
-    
-    func deletingPrefix(_ prefix: String) -> String {
-        guard self.hasPrefix(prefix) else { return self }
-        return String(self.dropFirst(prefix.count))
-    }
 }
-

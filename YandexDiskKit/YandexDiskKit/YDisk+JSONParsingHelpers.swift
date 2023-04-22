@@ -29,7 +29,7 @@ import Foundation
 
 extension YandexDisk {
 
-    class func hrefMethodTemplatedWithDictionary(dict:NSDictionary?) -> (href:String, method:String, templated:Bool) {
+    class func hrefMethodTemplatedWithDictionary(_ dict:NSDictionary?) -> (href:String, method:String, templated:Bool) {
 
         if let json = dict,
            let href = json["href"] as? String,
@@ -43,24 +43,17 @@ extension YandexDisk {
         return (href:"", method:"", templated:false)
     }
 
-    class func JSONDictionaryWithData(data:NSData?, errorHandler:(NSError?)->Void) -> NSDictionary? {
-        if let jsonData = data {
-            if jsonData.length == 0 {
+    class func JSONDictionaryWithData(_ data:Data!, errorHandler:(Error)->Void) -> NSDictionary? {
+        do {
+            guard let data = data, !data.isEmpty else { // some
                 return [:]
             }
-            
-            do {
-                if let jsonRoot = try JSONSerialization.jsonObject(with: jsonData as Data, options: []) as? [String: Any] {
-                    return jsonRoot as NSDictionary?
-                }
-                else {
-                    errorHandler(NSError(domain: "Couldn't create JSON dictionary.", code: 0, userInfo: ["data":jsonData]))
-                }
-            } catch let anyError as NSError {
-                print("Failed to parse: \(anyError.localizedDescription)")
-                errorHandler(anyError)
-            }
+            let jsonRoot = try JSONSerialization.jsonObject(with: data, options: []) as? NSDictionary
+            return jsonRoot;
         }
-        return nil
+        catch {
+            errorHandler(error);
+            return nil;
+        }
     }
 }

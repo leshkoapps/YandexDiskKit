@@ -32,7 +32,7 @@ extension YandexDisk {
     public enum DeletionResult {
         case Done
         case InProcess(href:String, method:String, templated:Bool)
-        case Failed(NSError!)
+        case Failed(Error)
     }
 
     /// Empties the trash.
@@ -43,8 +43,8 @@ extension YandexDisk {
     /// API reference resources:
     ///   `english http://api.yandex.com/disk/api/reference/trash-delete.xml`_,
     ///   `russian https://tech.yandex.ru/disk/api/reference/trash-delete-docpage/`_.
-    public func emptyTrash(handler:((_ result:DeletionResult) -> Void)? = nil) -> Result<DeletionResult> {
-        return deletePath(path: .Trash(""), handler: handler)
+    public func emptyTrash(handler:((DeletionResult) -> Void)? = nil) -> Result<DeletionResult> {
+        return deletePath(.Trash(""), handler: handler)
     }
 
     /// Delete file or folder
@@ -62,7 +62,7 @@ extension YandexDisk {
     /// API reference for trashed resources:
     ///   `english http://api.yandex.com/disk/api/reference/trash-delete.xml`_,
     ///   `russian https://tech.yandex.ru/disk/api/reference/trash-delete-docpage/`_.
-    public func deletePath(path:Path, permanently:Bool?=nil, handler:((_ result:DeletionResult) -> Void)? = nil) -> Result<DeletionResult> {
+    public func deletePath(_ path:Path, permanently:Bool?=nil, handler:((DeletionResult) -> Void)? = nil) -> Result<DeletionResult> {
         let result = Result<DeletionResult>(handler: handler)
 
         var url : String
@@ -71,30 +71,30 @@ extension YandexDisk {
         case .App, .Disk:
             url = "\(baseURL)/v1/disk/resources?path=\(path.toUrlEncodedString)"
 
-            url.appendOptionalURLParameter(name: "permanently", value:permanently)
+            url.appendOptionalURLParameter("permanently", value:permanently)
         case .Trash:
             url = "\(baseURL)/v1/disk/trash/resources/?path=\(path.toUrlEncodedString)"
 
             assert(permanently==nil, "Trash resources do not support parameter \'permanently\'.")
         }
 
-        let error = { result.set(result: .Failed($0)) }
+        let error = { result.set(.Failed($0)) }
 
-        session.jsonTaskWithURL(url: url, method:"DELETE", errorHandler: error) {
+        session.jsonTaskWithURL(url, method:"DELETE", errorHandler: error) {
             (jsonRoot, response)->Void in
 
             switch response.statusCode {
             case 202:
-                let (href, method, templated) = YandexDisk.hrefMethodTemplatedWithDictionary(dict: jsonRoot)
-                return result.set(result: .InProcess(href:href, method:method, templated:templated))
+                let (href, method, templated) = YandexDisk.hrefMethodTemplatedWithDictionary(jsonRoot);
+                return result.set(.InProcess(href: href, method: method, templated: templated));
 
             case 204:
-                return result.set(result: .Done)
+                return result.set(.Done)
 
             default:
                 return error(NSError(domain: "YDisk", code: response.statusCode, userInfo: ["response":response]))
             }
-        }?.resume()
+        }.resume()
 
         return result
     }

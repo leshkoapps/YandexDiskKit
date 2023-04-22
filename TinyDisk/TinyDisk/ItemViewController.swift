@@ -39,7 +39,7 @@ public class ItemViewController: UIViewController, UITableViewDataSource, UITabl
         super.init(coder: aDecoder)
     }
 
-    override init(nibName nibNameOrNil: String!, bundle nibBundleOrNil: Bundle!) {
+    override init(nibName nibNameOrNil: String?, bundle nibBundleOrNil: Bundle?) {
         super.init(nibName: nibNameOrNil, bundle: nibBundleOrNil)
     }
 
@@ -59,7 +59,7 @@ public class ItemViewController: UIViewController, UITableViewDataSource, UITabl
         super.viewDidLoad()
 
         if item.public_url != nil {
-            self.navigationItem.rightBarButtonItem = UIBarButtonItem(barButtonSystemItem: .action, target: self, action:"action:")
+            self.navigationItem.rightBarButtonItem = UIBarButtonItem(barButtonSystemItem: .action, target: self, action: #selector(self.action(_:)))
         }
 
         var image : UIImage!
@@ -78,11 +78,11 @@ public class ItemViewController: UIViewController, UITableViewDataSource, UITabl
         }
 
         if let preview = item.preview {
-            disk.session.dataTask(with: NSURL(string: preview)! as URL) {
+            disk.session.dataTask(with: URL(string: preview)!) {
                 (data, response, error) -> Void in
 
                 let res = response as? HTTPURLResponse
-                let image = UIImage(data: data ?? Data())
+                let image = UIImage(data: data!)
 
                 DispatchQueue.main.async {
                     if let iv = self.preview {
@@ -99,14 +99,14 @@ public class ItemViewController: UIViewController, UITableViewDataSource, UITabl
         // Dispose of any resources that can be recreated.
     }
 
-    func action(sender:AnyObject?) {
+    @IBAction func action(_ sender:AnyObject?) {
         let activityItems = [ item.public_url! ]
 
         let activityView = UIActivityViewController(activityItems: activityItems, applicationActivities: nil)
         activityView.modalPresentationStyle = .popover
 
         if let  popoverController = activityView.popoverPresentationController {
-            if let view = sender?.value(forKeyPath: "view") as? UIView {
+            if let view = sender?.value(forKey: "view") as? UIView {
                 popoverController.sourceView = view
                 popoverController.sourceRect = view.bounds
             }
@@ -130,11 +130,7 @@ public class ItemViewController: UIViewController, UITableViewDataSource, UITabl
 
         let cellIdentifier = "TinyDiskItemCell"
 
-        var cell : UITableViewCell! = tableView.dequeueReusableCell(withIdentifier: cellIdentifier) as? UITableViewCell
-
-        if cell == nil {
-            cell = UITableViewCell(style: .subtitle, reuseIdentifier: cellIdentifier)
-        }
+        let cell = tableView.dequeueReusableCell(withIdentifier: cellIdentifier) ?? UITableViewCell(style: .subtitle, reuseIdentifier: cellIdentifier)
 
         var name : String?
         var value : String?

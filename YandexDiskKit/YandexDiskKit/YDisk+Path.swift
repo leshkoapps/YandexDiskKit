@@ -57,48 +57,60 @@ public func ==(l:YandexDisk.Path, r:YandexDisk.Path) -> Bool {
 
 extension YandexDisk {
 
-    public enum Path : CustomStringConvertible, Equatable {
+    public enum Path : Equatable, CustomStringConvertible {
         case App(String)
         case Disk(String)
         case Trash(String)
 
-        private static func stringWithoutTrainingSlash(path: String) -> String {
+        private static func stringWithoutTrainingSlash(_ path: String) -> String {
             if path.hasSuffix("/") {
-                return String(path.dropLast())
-            }
-            else {
+                let index = path.index(before: path.endIndex);
+                return String( path[..<index] );
+            } else {
                 return path
             }
         }
 
-        public static func appPathWithString(path: String) -> YandexDisk.Path {
-            var resultPath = path.deletingPrefix("app:/")
-            resultPath = stringWithoutTrainingSlash(path: resultPath)
-            return YandexDisk.Path.App(resultPath)
+        public static func appPathWithString(_ path: String) -> YandexDisk.Path {
+            var path = path;
+            if path.hasPrefix("app:/") {
+                let index = path.index(path.startIndex, offsetBy: 5)
+                path = String( path[index..<path.endIndex] );
+            }
+            path = stringWithoutTrainingSlash(path)
+            return YandexDisk.Path.App(path)
         }
 
-        public static func diskPathWithString(path: String) -> YandexDisk.Path {
-            var resultPath = path.deletingPrefix("disk:/")
-            resultPath = stringWithoutTrainingSlash(path: resultPath)
-            return YandexDisk.Path.Disk(resultPath)
+        public static func diskPathWithString(_ path: String) -> YandexDisk.Path {
+            var path = path;
+            if path.hasPrefix("disk:/") {
+                let index = path.index(path.startIndex, offsetBy: 6)
+                path = String( path[index..<path.endIndex] );
+            }
+            path = stringWithoutTrainingSlash(path)
+            return YandexDisk.Path.Disk(path)
         }
 
-        public static func trashPathWithString(path: String) -> YandexDisk.Path {
-            var resultPath = path.deletingPrefix("trash:/")
-            resultPath = stringWithoutTrainingSlash(path: resultPath)
-            return YandexDisk.Path.Trash(resultPath)
+        public static func trashPathWithString(_ path: String) -> YandexDisk.Path {
+            var path = path;
+            if path.hasPrefix("trash:/") {
+                let index = path.index(path.startIndex, offsetBy: 7)
+                path = String( path[index..<path.endIndex] );
+            }
+            path = stringWithoutTrainingSlash(path)
+            return YandexDisk.Path.Trash(path)
         }
 
-        public static func pathWithString(path: String) -> YandexDisk.Path {
+        public static func pathWithString(_ path: String) -> YandexDisk.Path {
             switch path {
             case let path where path.hasPrefix("app:/"):
-                return appPathWithString(path: path)
+                return appPathWithString(path)
             case let path where path.hasPrefix("disk:/"):
-                return diskPathWithString(path: path)
+                return diskPathWithString(path)
             case let path where path.hasPrefix("trash:/"):
-                return trashPathWithString(path: path)
+                return trashPathWithString(path)
             default:
-                return diskPathWithString(path: path)
+                return diskPathWithString(path)
             }
         }
 
@@ -117,7 +129,7 @@ extension YandexDisk {
             return self.stringValue.urlEncoded()
         }
 
-        /// Required by protocol CustomStringConvertible
+        /// Required by protocol Printable
         public var description: String {
             return self.stringValue
         }

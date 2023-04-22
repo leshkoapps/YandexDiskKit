@@ -32,7 +32,7 @@ extension YandexDisk {
     public enum MoveResult {
         case Done(href:String, method:String, templated:Bool)
         case InProcess(href:String, method:String, templated:Bool)
-        case Failed(NSError!)
+        case Failed(Error)
     }
     
     /// Move file or folder
@@ -50,31 +50,31 @@ extension YandexDisk {
     /// API reference:
     ///   `english http://api.yandex.com/disk/api/reference/move.xml`_,
     ///   `russian https://tech.yandex.ru/disk/api/reference/move-docpage/`_.
-    public func movePath(path:Path, fromPath:Path, overwrite:Bool?=nil, handler:((_ result:MoveResult) -> Void)? = nil) -> Result<MoveResult> {
+    public func movePath(_ path:Path, fromPath:Path, overwrite:Bool?=nil, handler:((MoveResult) -> Void)? = nil) -> Result<MoveResult> {
         let result = Result<MoveResult>(handler: handler)
 
         var url = "\(baseURL)/v1/disk/resources/move?path=\(path.toUrlEncodedString)&from=\(fromPath.toUrlEncodedString)"
 
-        url.appendOptionalURLParameter(name: "overwrite", value:overwrite)
+        url.appendOptionalURLParameter("overwrite", value:overwrite)
 
-        let error = { result.set(result: .Failed($0)) }
+        let error = { result.set(.Failed($0)) }
 
-        session.jsonTaskWithURL(url: url, method:"POST", errorHandler: error) {
+        session.jsonTaskWithURL(url, method:"POST", errorHandler: error) {
             (jsonRoot, response)->Void in
 
-            let (href, method, templated) = YandexDisk.hrefMethodTemplatedWithDictionary(dict: jsonRoot)
+            let (href, method, templated) = YandexDisk.hrefMethodTemplatedWithDictionary(jsonRoot)
 
             switch response.statusCode {
             case 201:
-                return result.set(result: .Done(href:href, method:method, templated:templated))
+                return result.set(.Done(href:href, method:method, templated:templated))
 
             case 202:
-                return result.set(result: .InProcess(href:href, method:method, templated:templated))
+                return result.set(.InProcess(href:href, method:method, templated:templated))
 
             default:
                 return error(NSError(domain: "YDisk", code: response.statusCode, userInfo: ["response":response]))
             }
-        }?.resume()
+        }.resume()
         
         return result
     }

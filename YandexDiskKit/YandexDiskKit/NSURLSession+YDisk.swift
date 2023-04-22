@@ -29,30 +29,27 @@ import Foundation
 
 extension URLSession {
 
-    func jsonTaskWithURL(url: String, method:String = "GET", body:NSData? = nil, errorHandler: @escaping ((NSError?) -> Void), completionHandler: @escaping ((NSDictionary, HTTPURLResponse) -> Void)) -> URLSessionDataTask? {
-        guard let requestUrl = URL(string: url) else {
-            errorHandler(NSError(domain: "YDisk", code: 1, userInfo: ["message":"Invalid URL."]))
-            return nil
-        }
-        var request = URLRequest(url: requestUrl)
+    func jsonTaskWithURL(_ url: String, method:String = "GET", body:Data?=nil, errorHandler: @escaping ((Error) -> Void), completionHandler: @escaping ((NSDictionary, HTTPURLResponse) -> Void)) -> URLSessionDataTask {
+        let url = URL(string: url);
+        var request = URLRequest(url: url!);
         request.httpMethod = method
-        return jsonTaskWithRequest(request: request, body: body, errorHandler: errorHandler, completionHandler: completionHandler)
+        return jsonTaskWithRequest(request, body: body, errorHandler: errorHandler, completionHandler: completionHandler)
     }
 
-    func jsonTaskWithRequest(request: URLRequest, body:NSData?=nil, errorHandler: @escaping ((NSError?) -> Void), completionHandler: @escaping ((NSDictionary, HTTPURLResponse) -> Void)) -> URLSessionDataTask {
+    func jsonTaskWithRequest(_ request: URLRequest, body:Data?=nil, errorHandler: @escaping ((Error) -> Void), completionHandler: @escaping ((NSDictionary, HTTPURLResponse) -> Void)) -> URLSessionDataTask {
 
-        let requestBody = body ?? NSData()
+        let requestBody = body ?? Data()
         
-        return uploadTask(with: request, from: requestBody as Data?) {
+        return uploadTask(with: request, from: requestBody) {
             (data, response, error)->Void in
 
             if error != nil {
-                return errorHandler(error as NSError?)
+                return errorHandler(error!)
             }
 
             if let response = response as? HTTPURLResponse {
                 
-                if let jsonRoot = YandexDisk.JSONDictionaryWithData(data: data as NSData?, errorHandler:errorHandler) {
+                if let jsonRoot = YandexDisk.JSONDictionaryWithData(data, errorHandler:errorHandler) {
                     switch response.statusCode {
                     case 400...599:
                         return errorHandler(NSError(domain: "YDisk", code: response.statusCode, userInfo: ["response":response, "json":jsonRoot]))

@@ -31,7 +31,7 @@ extension YandexDisk {
 
     public enum MetainfoResult {
         case Done(total_space: Int, used_space: Int, trash_size: Int, system_folders:[String:Path])
-        case Failed(NSError!)
+        case Failed(Error)
     }
 
     /// Recieves meta info about the disk
@@ -42,14 +42,14 @@ extension YandexDisk {
     /// API reference:
     ///   `english http://api.yandex.com/disk/api/reference/capacity.xml`_,
     ///   `russian https://tech.yandex.ru/disk/api/reference/capacity-docpage/`_.
-    public func metainfo(handler:((_ result:MetainfoResult) -> Void)? = nil) -> Result<MetainfoResult> {
+    public func metainfo(_ handler:((MetainfoResult) -> Void)? = nil) -> Result<MetainfoResult> {
         let result = Result<MetainfoResult>(handler: handler)
 
-        let url = "\(baseURL)/v1/disk/"
+        var url = "\(baseURL)/v1/disk/"
 
-        let error = { result.set(result: .Failed($0)) }
+        let error = { result.set(.Failed($0)) }
 
-        session.jsonTaskWithURL(url: url, errorHandler: error) {
+        session.jsonTaskWithURL(url, errorHandler: error) {
             (jsonRoot, response)->Void in
 
             switch response.statusCode {
@@ -64,10 +64,10 @@ extension YandexDisk {
                         if let key = key as? String,
                            let value = value as? String
                         {
-                            system_folders[key] = Path.pathWithString(path: value)
+                            system_folders[key] = Path.pathWithString(value)
                         }
                     }
-                    return result.set(result: .Done(total_space:total_space, used_space:used_space, trash_size:trash_size, system_folders:system_folders))
+                    return result.set(.Done(total_space:total_space, used_space:used_space, trash_size:trash_size, system_folders:system_folders))
                 } else {
                     fallthrough
                 }
@@ -75,7 +75,7 @@ extension YandexDisk {
             default:
                 return error(NSError(domain: "YDisk", code: response.statusCode, userInfo: ["response":response, "json":jsonRoot]))
             }
-        }?.resume()
+        }.resume()
 
         return result
     }

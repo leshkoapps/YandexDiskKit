@@ -44,7 +44,7 @@ public class Result<T> {
         }
     }
 
-    func set(result: T) {
+    func set(_ result: T) {
         if self.result == nil {
             self.result = result
         }
@@ -52,7 +52,7 @@ public class Result<T> {
 
     public var onResult: ((T) -> Void)?
 
-    public func _await() {
+    public func await() {
         condition.lock()
         while result == nil {
             condition.wait()
@@ -61,7 +61,7 @@ public class Result<T> {
     }
 
     public func get() -> T {
-        _await()
+        self.await()
         return result!
     }
 

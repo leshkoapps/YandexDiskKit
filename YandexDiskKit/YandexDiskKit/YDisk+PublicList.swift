@@ -46,17 +46,17 @@ extension YandexDisk {
     /// API reference:
     ///   `english http://api.yandex.com/disk/api/reference/public.xml`_,
     ///   `russian https://tech.yandex.ru/disk/api/reference/public-docpage/`_.
-    public func listPublic(key public_key:String, path:String?=nil, sort:SortKey?=nil, limit:Int?=nil, offset:Int?=nil, preview_size:PreviewSize?=nil, preview_crop:Bool?=nil, handler:((_ listing:ListingResult) -> Void)? = nil) -> Result<ListingResult> {
+    public func listPublic(key public_key:String, path:String?=nil, sort:SortKey?=nil, limit:Int?=nil, offset:Int?=nil, preview_size:PreviewSize?=nil, preview_crop:Bool?=nil, handler:((ListingResult) -> Void)? = nil) -> Result<ListingResult> {
 
         var url = "\(baseURL)/v1/disk/public/resources?public_key=\(public_key.urlEncoded())"
 
-        url.appendOptionalURLParameter(name: "path", value:path)
-        url.appendOptionalURLParameter(name: "sort", value:sort)
-        url.appendOptionalURLParameter(name: "limit", value:limit)
-        url.appendOptionalURLParameter(name: "offset", value:offset)
-        url.appendOptionalURLParameter(name: "preview_size", value:preview_size)
-        url.appendOptionalURLParameter(name: "preview_crop", value:preview_crop)
+        url.appendOptionalURLParameter("path", value:path)
+        url.appendOptionalURLParameter("sort", value:sort)
+        url.appendOptionalURLParameter("limit", value:limit)
+        url.appendOptionalURLParameter("offset", value:offset)
+        url.appendOptionalURLParameter("preview_size", value:preview_size)
+        url.appendOptionalURLParameter("preview_crop", value:preview_crop)
 
-        return _listURL(url: url, handler: handler)
+        return _listURL(url, handler: handler)
     }
 }

@@ -31,7 +31,7 @@ extension YandexDisk {
 
     public enum APIVersionResult {
         case Done(build: String, version: String)
-        case Failed(NSError!)
+        case Failed(Error)
     }
 
     /// Yandex Disk API version and build implemented.
@@ -49,14 +49,14 @@ extension YandexDisk {
     /// :returns: `APIVersionResult` future.
     ///
     /// API reference: *undocumented*
-    public func apiVersion(handler:((_ result:APIVersionResult) -> Void)? = nil) -> Result<APIVersionResult> {
+    public func apiVersion(_ handler:((APIVersionResult) -> Void)? = nil) -> Result<APIVersionResult> {
         let result = Result<APIVersionResult>(handler: handler)
 
-        let url = "\(baseURL)/"
+        var url = "\(baseURL)/"
 
-        let error = { result.set(result: .Failed($0)) }
+        let error = { result.set(.Failed($0)) }
 
-        session.jsonTaskWithURL(url: url, errorHandler: error) {
+        session.jsonTaskWithURL(url, errorHandler: error) {
             (jsonRoot, response)->Void in
 
             switch response.statusCode {
@@ -64,7 +64,7 @@ extension YandexDisk {
                 if let build = jsonRoot["build"] as? String,
                    let version = jsonRoot["api_version"] as? String
                 {
-                    return result.set(result: .Done(build: build, version: version))
+                    return result.set(.Done(build: build, version: version))
                 } else {
                     return error(NSError(domain: "YDisk", code: response.statusCode, userInfo: ["response":response, "json":jsonRoot]))
                 }
@@ -72,7 +72,7 @@ extension YandexDisk {
             default:
                 return error(NSError(domain: "YDisk", code: response.statusCode, userInfo: ["response":response]))
             }
-        }?.resume()
+        }.resume()
 
         return result
     }

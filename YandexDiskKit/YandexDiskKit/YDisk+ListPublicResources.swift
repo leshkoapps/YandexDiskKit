@@ -31,7 +31,7 @@ extension YandexDisk {
 
     public enum PublicResourceListingResult {
         case Listing(items:[YandexDiskResource], type:YandexDiskResourceType?, limit:Int?, offset:Int? )
-        case Failed(NSError!)
+        case Failed(Error)
     }
 
     /// List metainfo for public file or folder.
@@ -47,25 +47,25 @@ extension YandexDisk {
     /// API reference:
     ///   `english http://api.yandex.com/disk/api/reference/meta.xml`_,
     ///   `russian https://tech.yandex.ru/disk/api/reference/meta-docpage/`_.
-    public func listPublicResources(limit:Int?=nil, offset:Int?=nil, type:YandexDiskResourceType?=nil, preview_size:PreviewSize?=nil, preview_crop:Bool?=nil, handler:((_ listing:PublicResourceListingResult) -> Void)? = nil) -> Result<PublicResourceListingResult> {
+    public func listPublicResources(_ limit:Int?=nil, offset:Int?=nil, type:YandexDiskResourceType?=nil, preview_size:PreviewSize?=nil, preview_crop:Bool?=nil, handler:((PublicResourceListingResult) -> Void)? = nil) -> Result<PublicResourceListingResult> {
         let result = Result<PublicResourceListingResult>(handler: handler)
 
         var url = "\(baseURL)/v1/disk/resources/public"
 
-        url.appendOptionalURLParameter(name: "limit", value:limit)
-        url.appendOptionalURLParameter(name: "offset", value:offset)
-        url.appendOptionalURLParameter(name: "type", value:type)
-        url.appendOptionalURLParameter(name: "preview_size", value:preview_size)
-        url.appendOptionalURLParameter(name: "preview_crop", value:preview_crop)
+        url.appendOptionalURLParameter("limit", value:limit)
+        url.appendOptionalURLParameter("offset", value:offset)
+        url.appendOptionalURLParameter("type", value:type)
+        url.appendOptionalURLParameter("preview_size", value:preview_size)
+        url.appendOptionalURLParameter("preview_crop", value:preview_crop)
 
-        let error = { result.set(result: .Failed($0)) }
+        let error = { result.set(.Failed($0)) }
 
-        session.jsonTaskWithURL(url: url, errorHandler: error) {
+        session.jsonTaskWithURL(url, errorHandler: error) {
             (jsonRoot, response)->Void in
 
             switch response.statusCode {
             case 200:
-                if let items = SimpleResource.resourcesFromArray(array: jsonRoot["items"] as? NSArray)
+                if let items = SimpleResource.resourcesFromArray(jsonRoot["items"] as? NSArray)
                 {
                     let limit = (jsonRoot["limit"] as? NSNumber)?.intValue
                     let offset = (jsonRoot["offset"] as? NSNumber)?.intValue
@@ -76,7 +76,7 @@ extension YandexDisk {
                         type = nil
                     }
 
-                    return result.set(result: .Listing(items: items, type: type, limit: limit, offset: offset))
+                    return result.set(.Listing(items: items, type: type, limit: limit, offset: offset))
                 } else {
                     return error(NSError(domain: "YDisk", code: response.statusCode, userInfo:
                         ["message":"incomplete JSON response", "json":jsonRoot]))
@@ -84,7 +84,7 @@ extension YandexDisk {
             default:
                 return error(NSError(domain: "YDisk", code: response.statusCode, userInfo: ["response":response]))
             }
-        }?.resume()
+        }.resume()
 
         return result
     }

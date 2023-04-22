@@ -36,7 +36,7 @@ extension YandexDisk {
         case Modified = "modified"
         case Size = "size"
 
-        /// Required by protocol CustomStringConvertible
+        /// Required by protocol Printable
         public var description: String {
             return self.rawValue
         }

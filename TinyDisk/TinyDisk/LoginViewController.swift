@@ -35,7 +35,7 @@ class LoginViewController: UIViewController {
         super.init(coder: aDecoder)
     }
 
-    override init(nibName nibNameOrNil: String!, bundle nibBundleOrNil: Bundle!) {
+    override init(nibName nibNameOrNil: String?, bundle nibBundleOrNil: Bundle?) {
         super.init(nibName: nibNameOrNil, bundle: nibBundleOrNil)
     }
 
@@ -45,13 +45,13 @@ class LoginViewController: UIViewController {
         self.clientId = clientId
     }
 
-    @IBAction func doLogin(sender: UIButton) {
+    @IBAction func doLogin(_ sender: UIButton) {
         let response_type = "token"
 
         let urlstr = "https://oauth.yandex.ru/authorize?response_type=\(response_type)&client_id=\(clientId)"
 
-        if let url = NSURL(string: urlstr) {
-            UIApplication.shared.open(url as URL, completionHandler: nil)
+        if let url = URL(string: urlstr) {
+            UIApplication.shared.open(url, completionHandler: nil);
         }
     }
 

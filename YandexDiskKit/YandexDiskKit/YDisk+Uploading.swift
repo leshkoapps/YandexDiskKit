@@ -32,7 +32,7 @@ extension YandexDisk {
     public enum UploadResult {
         case Done
         case InProcess(href:String, method:String, templated:Bool)
-        case Failed(NSError!)
+        case Failed(Error)
     }
 
     /// Uploads a file to Yandex Disk.
@@ -52,54 +52,51 @@ extension YandexDisk {
     ///   `english http://api.yandex.com/disk/api/reference/upload.xml`_,
     ///   `russian https://tech.yandex.ru/disk/api/reference/upload-docpage/`_.
     ///   and `https://tech.yandex.ru/disk/api/reference/upload-ext-docpage/`_
-    public func uploadURL(sourceURL:NSURL, toPath path:Path, overwrite:Bool?=nil, handler:((_ result:UploadResult) -> Void)? = nil) -> Result<UploadResult> {
+    public func uploadURL(_ sourceURL:URL, toPath path:Path, overwrite:Bool?=nil, handler:((UploadResult) -> Void)? = nil) -> Result<UploadResult> {
         let result = Result<UploadResult>(handler: handler)
 
         var url = "\(baseURL)/v1/disk/resources/upload?path=\(path.toUrlEncodedString)"
 
         assert(sourceURL.isFileURL || overwrite == nil, "Current version of the API supports 'overwrite' only for file uploads.")
-        url.appendOptionalURLParameter(name: "overwrite", value:overwrite)
+        url.appendOptionalURLParameter("overwrite", value:overwrite)
 
-        let error = { result.set(result: .Failed($0)) }
+        let error = { result.set(.Failed($0)) }
 
         if sourceURL.isFileURL {
-            session.jsonTaskWithURL(url: url, errorHandler: error) {
+            session.jsonTaskWithURL(url, errorHandler: error) {
                 (jsonRoot, response)->Void in
 
-                let (href, method, _) = YandexDisk.hrefMethodTemplatedWithDictionary(dict: jsonRoot)
+                let (href, method, templated) = YandexDisk.hrefMethodTemplatedWithDictionary(jsonRoot)
 
-                guard let requestUrl = URL(string: href) else {
-                    error(NSError(domain: "YDisk", code: 1, userInfo: ["message":"Invalid URL."]))
-                    return
-                }
-                var request = URLRequest(url: requestUrl)
+                let url = URL(string: href);
+                var request = URLRequest(url: url!);
                 request.httpMethod = method
 
-                self.transferSession.uploadTask(with: request, fromFile: sourceURL as URL) {
+                self.transferSession.uploadTask(with: request, fromFile: sourceURL) {
                     (data, resopnse, trasferError)->Void in
 
                     if trasferError != nil {
-                        return error(trasferError as NSError?)
+                        return error(trasferError!)
                     }
-                    return result.set(result: .Done)
+                    return result.set(.Done)
                 }.resume()
-            }?.resume()
+            }.resume()
         } else {
             url += "&url=\(sourceURL.description.urlEncoded())"
 
-            session.jsonTaskWithURL(url: url, method:"POST", errorHandler: error) {
+            session.jsonTaskWithURL(url, method:"POST", errorHandler: error) {
                 (jsonRoot, response)->Void in
 
-                let (href, method, templated) = YandexDisk.hrefMethodTemplatedWithDictionary(dict: jsonRoot)
+                let (href, method, templated) = YandexDisk.hrefMethodTemplatedWithDictionary(jsonRoot)
 
                 switch response.statusCode {
                 case 202:
-                    return result.set(result: .InProcess(href:href, method:method, templated:templated))
+                    return result.set(.InProcess(href:href, method:method, templated:templated))
 
                 default:
                     return error(NSError(domain: "YDisk", code: response.statusCode, userInfo: ["response":response]))
                 }
-            }?.resume()
+            }.resume()
         }
 
         return result

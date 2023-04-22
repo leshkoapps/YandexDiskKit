@@ -40,34 +40,15 @@ import Foundation
 ///
 public class YandexDisk {
 
-    public let token : [String:Any]
+    public let token : String
     public let baseURL = "https://cloud-api.yandex.net:443"
 
     /// MARK: - URL Session related
 
     var additionalHTTPHeaders : [String:String] {
-        
-        var authorizationHeaderValue = ""
-        
-        //Get 401 if we send actual value (bearer) instead of OAuth
-        /*
-        if let tokenType = self.token["token_type"] as! String? {
-            authorizationHeaderValue += tokenType
-        }
-        else {
-            authorizationHeaderValue += "OAuth"
-        }
-        */
-        authorizationHeaderValue += "OAuth"
-        
-        if let accessToken = self.token["access_token"] as! String? {
-            authorizationHeaderValue += " "
-            authorizationHeaderValue += accessToken
-        }
-        
         return [
             "Accept"        :   "application/json",
-            "Authorization" :   authorizationHeaderValue,
+            "Authorization" :   "OAuth \(token)",
             "User-Agent"    :   "Yandex Disk swift SDK"]
     }
 
@@ -86,13 +67,11 @@ public class YandexDisk {
             return _transferSession!
         } else if transferSessionIdentifier != nil && transferSessionDelegate != nil {
             let transferSessionConfig = URLSessionConfiguration.background(withIdentifier: transferSessionIdentifier!)
-            
-            transferSessionConfig.httpAdditionalHeaders = self.additionalHTTPHeaders
+            transferSessionConfig.httpAdditionalHeaders = additionalHTTPHeaders
             transferSessionConfig.httpShouldUsePipelining = true
 
             let queue = transferSessionQueue ?? OperationQueue.main
             _transferSession = URLSession(configuration: transferSessionConfig, delegate: transferSessionDelegate, delegateQueue: queue)
-            
             return _transferSession!
         } else {
             return session
@@ -103,31 +82,8 @@ public class YandexDisk {
     public var transferSessionDelegate: URLSessionDownloadDelegate?
     public var transferSessionQueue : OperationQueue?
 
-    public init(token:[String:Any]) {
+    public init(token:String) {
         self.token = token
-    }
-    
-    public static func token(from url: NSURL) -> [String:Any]? {
-        guard let urlString = url.absoluteString else { return nil }
-        
-        if let urlComponent = URLComponents(string: urlString) {
-            
-            let fragment = urlComponent.fragment
-            var fragmentComponents = URLComponents()
-            fragmentComponents.query = fragment
-            
-            let queryItems: [URLQueryItem]? = fragmentComponents.queryItems
-            let access_token = queryItems?.first(where: { $0.name == "access_token" })?.value
-            if access_token == nil {
-                return nil
-            }
-            else if let queryItemsUnwrapped = queryItems {
-                let tokenDict = queryItemsUnwrapped.toDictionary()
-                return tokenDict
-            }
-        }
-        
-        return nil
     }
 
 }

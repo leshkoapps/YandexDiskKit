@@ -32,13 +32,13 @@ public enum YandexDiskResourceType : String, CustomStringConvertible {
     case File = "file"
     case Directory = "dir"
 
-    /// Required by protocol CustomStringConvertible
+    /// Required by protocol Printable
     public var description: String {
         return self.rawValue
     }
 }
 
-public protocol YandexDiskResource : CustomStringConvertible {
+public protocol YandexDiskResource {
 
     var type : YandexDiskResourceType { get }
     var path : YandexDisk.Path { get }
@@ -97,7 +97,7 @@ extension YandexDisk {
             custom_properties = props["custom_properties"] as? NSDictionary
         }
 
-        class func resourceFromDictionary(properties:NSDictionary?) -> YandexDiskResource? {
+        class func resourceFromDictionary(_ properties:NSDictionary?) -> YandexDiskResource? {
             // According to API documentationthe following properties are
             // required, so we will fail if they are not existing
 
@@ -109,7 +109,7 @@ extension YandexDisk {
                let created_str = props["created"] as? String,
                let modified_str = props["modified"] as? String
             {
-                let path = Path.pathWithString(path: path_str)
+                let path = Path.pathWithString(path_str)
                 let created = dateformatter.date(from: created_str) ?? Date(timeIntervalSince1970: 0)
                 let modified = dateformatter.date(from: modified_str) ?? Date(timeIntervalSince1970: 0)
 
@@ -118,13 +118,13 @@ extension YandexDisk {
             return nil
         }
 
-        class func resourcesFromArray(array:NSArray?) -> [YandexDiskResource]? {
+        class func resourcesFromArray(_ array:NSArray?) -> [YandexDiskResource]? {
 
             var elements: [YandexDiskResource] = []
 
             if let items = array {
                 for item in items {
-                    if let element = SimpleResource.resourceFromDictionary(properties: item as? NSDictionary) {
+                    if let element = SimpleResource.resourceFromDictionary(item as? NSDictionary) {
                         elements += [element]
                     } else {
                         return nil
@@ -136,7 +136,7 @@ extension YandexDisk {
         }
         
 
-        /// Required by protocol CustomStringConvertible
+        /// Required by protocol Printable
         override public var description: String {
         if let s = size {
             return "f \(name) \t\(s) bytes \t\(mime_type ?? String())"

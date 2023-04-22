@@ -38,10 +38,10 @@ import Foundation
 /// optionally it is possible to specify the queue in which background transfers are processed.
 /// - transferSessionQueue
 ///
-public class YandexDisk {
+@objc public class YandexDisk : NSObject {
 
-    public let token : String
-    public let baseURL = "https://cloud-api.yandex.net:443"
+    @objc public let token : String
+    @objc public let baseURL = "https://cloud-api.yandex.net:443"
 
     /// MARK: - URL Session related
 
@@ -52,7 +52,7 @@ public class YandexDisk {
             "User-Agent"    :   "Yandex Disk swift SDK"]
     }
 
-    public lazy var session : URLSession = {
+    @objc public lazy var session : URLSession = {
         let sessionConfig = URLSessionConfiguration.default
         sessionConfig.httpAdditionalHeaders = self.additionalHTTPHeaders
         sessionConfig.httpShouldUsePipelining = true
@@ -62,7 +62,7 @@ public class YandexDisk {
     }()
 
     private var _transferSession : URLSession?
-    public var transferSession : URLSession {
+    @objc public var transferSession : URLSession {
         if _transferSession != nil {
             return _transferSession!
         } else if transferSessionIdentifier != nil && transferSessionDelegate != nil {
@@ -78,11 +78,11 @@ public class YandexDisk {
         }
     }
 
-    public var transferSessionIdentifier: String?
-    public var transferSessionDelegate: URLSessionDownloadDelegate?
-    public var transferSessionQueue : OperationQueue?
+    @objc public var transferSessionIdentifier: String?
+    @objc public var transferSessionDelegate: URLSessionDownloadDelegate?
+    @objc public var transferSessionQueue : OperationQueue?
 
-    public init(token:String) {
+    @objc public init(token:String) {
         self.token = token
     }
 

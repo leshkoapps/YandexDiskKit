@@ -59,22 +59,22 @@ public protocol YandexDiskResource {
 
 extension YandexDisk {
     
-    public class SimpleResource : NSObject, YandexDiskResource {
+    @objc public class SimpleResource : NSObject, YandexDiskResource {
 
         public let type : YandexDiskResourceType
-        public let name : String
+        @objc public let name : String
         public let path : YandexDisk.Path
-        public let created : Date
-        public let modified : Date
-        public let size : NSNumber?
-        public let md5 : String?
-        public let mime_type : String?
-        public let media_type : String?
-        public let preview : String?
-        public let public_key : String?
-        public let public_url : String?
-        public let origin_path: String?
-        public let custom_properties: NSDictionary?
+        @objc public let created : Date
+        @objc public let modified : Date
+        @objc public let size : NSNumber?
+        @objc public let md5 : String?
+        @objc public let mime_type : String?
+        @objc public let media_type : String?
+        @objc public let preview : String?
+        @objc public let public_key : String?
+        @objc public let public_url : String?
+        @objc public let origin_path: String?
+        @objc public let custom_properties: NSDictionary?
 
         private static let dateformatter = DateFormatter.iso8601dateFormatter()
 

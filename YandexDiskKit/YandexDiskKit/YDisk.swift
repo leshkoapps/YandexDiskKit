@@ -48,12 +48,17 @@ public class YandexDisk {
     var additionalHTTPHeaders : [String:String] {
         
         var authorizationHeaderValue = ""
+        
+        //Get 401 if we send actual value (bearer) instead of OAuth
+        /*
         if let tokenType = self.token["token_type"] as! String? {
             authorizationHeaderValue += tokenType
         }
         else {
             authorizationHeaderValue += "OAuth"
         }
+        */
+        authorizationHeaderValue += "OAuth"
         
         if let accessToken = self.token["access_token"] as! String? {
             authorizationHeaderValue += " "

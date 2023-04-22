@@ -45,6 +45,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate, DirectoryViewControllerDe
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey : Any]? = nil) -> Bool {
         self.window = UIWindow(frame: UIScreen.main.bounds)
         
+        //https://oauth.yandex.ru/verification_code#access_token=y0_AgAABBBQ9D2bAAKflAAAAADhf_aADTMNrvyUQgenBfyR7zAs2p5vzSQ&token_type=bearer&expires_in=31536000
+        //self.token = ["access_token":"y0_AgAABBBQ9D2bAAKflAAAAADhf_aADTMNrvyUQgenBfyR7zAs2p5vzSQ","token_type":"Bearer","expires_in":"31536000"]
         self.token = loadToken()
         
         if let options = launchOptions {

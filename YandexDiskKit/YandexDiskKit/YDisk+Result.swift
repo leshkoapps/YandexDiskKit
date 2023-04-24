@@ -27,7 +27,11 @@
 
 import Foundation
 
-public class Result<T> {
+@objc protocol URLSessionTaskWrapper {
+    var task : URLSessionTask? { get set }
+}
+
+public class Result<T> : URLSessionTaskWrapper{
 
     var condition = NSCondition()
     

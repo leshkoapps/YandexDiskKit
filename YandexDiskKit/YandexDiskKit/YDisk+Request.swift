@@ -10,25 +10,20 @@ import Foundation
 
 @objc public class YandexDiskCancellableRequest: NSObject {
     
-    private var result: AnyObject
+    private var result: URLSessionTaskWrapper
     
-    init(with result: AnyObject) {
+    init(with result: URLSessionTaskWrapper) {
         self.result = result
         super.init()
     }
     
     @objc func cancel() {
-        if self.result.responds(to: "cancel") {
-            self.result.cancel()
-        }
+        self.result.task?.cancel()
     }
     
     @objc func getURLTask() -> URLSessionTask? {
-        if self.result.responds(to: "task") {
-            return self.result.task
-        }
-        return nil
+        return self.result.task
     }
-
+    
 }
 

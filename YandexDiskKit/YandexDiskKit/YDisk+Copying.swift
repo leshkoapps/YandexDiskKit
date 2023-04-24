@@ -28,13 +28,13 @@
 import Foundation
 
 extension YandexDisk {
-
+    
     public enum CopyResult {
         case Done(href:String, method:String, templated:Bool)
         case InProcess(href:String, method:String, templated:Bool)
         case Failed(Error)
     }
-
+    
     /// Copy file or folder
     ///
     /// :param: path        The path to the copy of the resource that is being created.
@@ -52,30 +52,63 @@ extension YandexDisk {
     ///   `russian https://tech.yandex.ru/disk/api/reference/copy-docpage/`_.
     public func copyPath(_ path:Path, fromPath:Path, overwrite:Bool?=nil, handler:((CopyResult) -> Void)? = nil) -> Result<CopyResult> {
         let result = Result<CopyResult>(handler: handler)
-
+        
         var url = "\(baseURL)/v1/disk/resources/copy?path=\(path.toUrlEncodedString)&from=\(fromPath.toUrlEncodedString)"
-
+        
         url.appendOptionalURLParameter("overwrite", value:overwrite)
-
+        
         let error = { result.set(.Failed($0)) }
-
-        session.jsonTaskWithURL(url, method:"POST", errorHandler: error) {
+        
+        let task = session.jsonTaskWithURL(url, method:"POST", errorHandler: error) {
             (jsonRoot, response)->Void in
-
+            
             let (href, method, templated) = YandexDisk.hrefMethodTemplatedWithDictionary(jsonRoot)
-
+            
             switch response.statusCode {
             case 201:
                 return result.set(.Done(href:href, method:method, templated:templated))
-
+                
             case 202:
                 return result.set(.InProcess(href:href, method:method, templated:templated))
-
+                
             default:
                 return error(NSError(domain: "YDisk", code: response.statusCode, userInfo: ["response":response]))
             }
-        }.resume()
-
+        }
+        result.task = task
+        task.resume()
+        
         return result
     }
+    
+    @objc public func copyDiskPath(from: String,
+                                   to: String,
+                                   overwrite: Bool,
+                                   doneHandler: YandexDiskInProgressHandler,
+                                   inProcessHandler: YandexDiskInProgressHandler,
+                                   failureHandler: YandexDiskErrorHandler) -> YandexDiskCancellableRequest
+    {
+        let fromPath = Path.diskPathWithString(from)
+        let toPath = Path.diskPathWithString(to)
+        
+        let result = self.copyPath(toPath, fromPath: fromPath, overwrite: overwrite) { copyResult in
+            switch copyResult {
+            case .Failed(let error):
+                if let failure = failureHandler {
+                    failure(error as NSError)
+                }
+            case let .InProcess(href, method, templated):
+                if let inProgress = inProcessHandler {
+                    inProgress(href as NSString, method as NSString, templated)
+                }
+            case let .Done(href, method, templated):
+                if let done = doneHandler {
+                    done(href as NSString, method as NSString, templated)
+                }
+            }
+        }
+        
+        return YandexDiskCancellableRequest(with: result)
+    }
+    
 }

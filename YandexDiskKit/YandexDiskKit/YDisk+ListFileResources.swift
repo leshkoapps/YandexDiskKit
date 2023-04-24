@@ -62,7 +62,7 @@ extension YandexDisk {
 
         let error = { result.set(.Failed($0)) }
 
-        session.jsonTaskWithURL(url, errorHandler: error) {
+        let task = session.jsonTaskWithURL(url, errorHandler: error) {
             (jsonRoot, response)->Void in
 
             switch response.statusCode {
@@ -80,7 +80,9 @@ extension YandexDisk {
             default:
                 return error(NSError(domain: "YDisk", code: response.statusCode, userInfo: ["response":response]))
             }
-        }.resume()
+        }
+        result.task = task
+        task.resume()
 
         return result
     }

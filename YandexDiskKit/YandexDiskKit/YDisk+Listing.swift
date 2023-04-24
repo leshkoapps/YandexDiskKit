@@ -28,13 +28,13 @@
 import Foundation
 
 extension YandexDisk {
-
+    
     public enum ListingResult {
         case File(YandexDiskResource)
         case Listing(dir:YandexDiskResource, limit:Int, offset:Int, total:Int, path:Path, sort:SortKey?, items:[YandexDiskResource] )
         case Failed(Error)
     }
-
+    
     /// List metainfo for file or folder.
     ///
     /// :param: path            The path to the desired resource. For example: `.Disk("/foo/bar.txt")`, `.App("file.ext")`, or `.Trash("/")`.
@@ -50,44 +50,44 @@ extension YandexDisk {
     ///   `english http://api.yandex.com/disk/api/reference/meta.xml`_,
     ///   `russian https://tech.yandex.ru/disk/api/reference/meta-docpage/`_.
     public func listPath(_ path:Path, sort:SortKey?=nil, limit:Int?=nil, offset:Int?=nil, preview_size:PreviewSize?=nil, preview_crop:Bool?=nil, handler:((ListingResult) -> Void)? = nil) -> Result<ListingResult> {
-
+        
         var url : String
-
+        
         switch path {
         case .App, .Disk:
             url = "\(baseURL)/v1/disk/resources?path=\(path.toUrlEncodedString)"
         case .Trash:
             url = "\(baseURL)/v1/disk/trash/resources/?path=\(path.toUrlEncodedString)"
         }
-
+        
         url.appendOptionalURLParameter("sort", value:sort)
         url.appendOptionalURLParameter("limit", value:limit)
         url.appendOptionalURLParameter("offset", value:offset)
         url.appendOptionalURLParameter("preview_size", value:preview_size)
         url.appendOptionalURLParameter("preview_crop", value:preview_crop)
-
+        
         return _listURL(url, handler:handler)
     }
-
+    
     func _listURL(_ url:String, handler:((ListingResult) -> Void)? = nil) -> Result<ListingResult> {
         let result = Result<ListingResult>(handler: handler)
-
+        
         let error = { result.set(.Failed($0)) }
-
-        session.jsonTaskWithURL(url, errorHandler: error) {
+        
+        let task = session.jsonTaskWithURL(url, errorHandler: error) {
             (jsonRoot, response)->Void in
-
+            
             switch response.statusCode {
             case 200:
-                var rootItem = SimpleResource.resourceFromDictionary(jsonRoot)
-
+                let rootItem = SimpleResource.resourceFromDictionary(jsonRoot)
+                
                 if let rootItem = rootItem {
                     switch rootItem.type {
                     case .File:
                         return result.set(.File(rootItem))
-
+                        
                     case .Directory:
-
+                        
                         if let embedded = jsonRoot["_embedded"] as? NSDictionary,
                            let path_str = embedded["path"] as? String,
                            let sort_str = embedded["sort"] as? String,
@@ -104,19 +104,68 @@ extension YandexDisk {
                             return result.set(.Listing(dir: rootItem, limit: limit, offset: offset, total: total, path: path, sort: sort, items: items))
                         } else {
                             return error(NSError(domain: "YDisk", code: response.statusCode, userInfo:
-                                ["message":"incomplete JSON response", "json":jsonRoot]))
+                                                    ["message":"incomplete JSON response", "json":jsonRoot]))
                         }
                     }
                 } else {
                     return error(NSError(domain: "YDisk", code: response.statusCode, userInfo:
-                        ["message":"incomplete JSON response", "json":jsonRoot]))
+                                            ["message":"incomplete JSON response", "json":jsonRoot]))
                 }
-
+                
             default:
                 return error(NSError(domain: "YDisk", code: response.statusCode, userInfo: ["response":response]))
             }
-        }.resume()
-
+        }
+        result.task = task
+        task.resume()
+        
         return result
     }
+    
+    func listHandler(listing: YandexDisk.ListingResult,
+                     fileHandler: YandexDiskDictionaryHandler,
+                     listingHandler: YandexDiskListingHandler,
+                     failureHandler: YandexDiskErrorHandler) -> Void
+    {
+        switch listing {
+        case .Failed(let error):
+            if let failure = failureHandler {
+                failure(error as NSError)
+            }
+        case .File(let file):
+            if let fileResultHandler = fileHandler {
+                let dictRepresentation = YandexDisk.propertyNamesAndValues(forObject: file) as NSDictionary
+                fileResultHandler(dictRepresentation)
+            }
+        case let .Listing(dir, limit, offset, total, path, sort, items):
+            if let listingResultHandler = listingHandler {
+                let dirRepresentation = YandexDisk.propertyNamesAndValues(forObject: dir) as NSDictionary
+                
+                let array = NSMutableArray()
+                for item in items {
+                    let representation = YandexDisk.propertyNamesAndValues(forObject: item) as NSDictionary
+                    array.add(representation)
+                }
+                
+                listingResultHandler(dirRepresentation, limit, offset, total, path.description as NSString?, sort?.description as NSString?, array)
+            }
+        }
+    }
+    
+    @objc public func listDiskPath(path: String,
+                                   limit: Int,
+                                   offset: Int,
+                                   fileHandler: YandexDiskDictionaryHandler,
+                                   listingHandler: YandexDiskListingHandler,
+                                   failureHandler: YandexDiskErrorHandler) -> YandexDiskCancellableRequest
+    {
+        let diskPath = Path.diskPathWithString(path)
+
+        let result = self.listPath(diskPath, sort:nil, limit:limit, offset:offset, preview_size:nil, preview_crop:nil) { ListingResult in
+            self.listHandler(listing: ListingResult, fileHandler: fileHandler, listingHandler: listingHandler, failureHandler: failureHandler)
+        }
+        
+        return YandexDiskCancellableRequest(with: result)
+    }
+    
 }

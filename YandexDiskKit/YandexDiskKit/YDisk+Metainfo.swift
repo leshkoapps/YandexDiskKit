@@ -28,12 +28,12 @@
 import Foundation
 
 extension YandexDisk {
-
+    
     public enum MetainfoResult {
         case Done(total_space: Int, used_space: Int, trash_size: Int, system_folders:[String:Path])
         case Failed(Error)
     }
-
+    
     /// Recieves meta info about the disk
     ///
     /// :param: handler     Optional.
@@ -44,14 +44,14 @@ extension YandexDisk {
     ///   `russian https://tech.yandex.ru/disk/api/reference/capacity-docpage/`_.
     public func metainfo(_ handler:((MetainfoResult) -> Void)? = nil) -> Result<MetainfoResult> {
         let result = Result<MetainfoResult>(handler: handler)
-
-        var url = "\(baseURL)/v1/disk/"
-
+        
+        let url = "\(baseURL)/v1/disk/"
+        
         let error = { result.set(.Failed($0)) }
-
-        session.jsonTaskWithURL(url, errorHandler: error) {
+        
+        let task = session.jsonTaskWithURL(url, errorHandler: error) {
             (jsonRoot, response)->Void in
-
+            
             switch response.statusCode {
             case 200:
                 if let system_folders_dict = jsonRoot["system_folders"] as? NSDictionary,
@@ -71,12 +71,41 @@ extension YandexDisk {
                 } else {
                     fallthrough
                 }
-
+                
             default:
                 return error(NSError(domain: "YDisk", code: response.statusCode, userInfo: ["response":response, "json":jsonRoot]))
             }
-        }.resume()
-
+        }
+        result.task = task
+        task.resume()
+        
         return result
+    }
+    
+    @objc public func metainfo(doneHandler: YandexDiskMetaInfoHandler,
+                               failureHandler: YandexDiskErrorHandler) -> YandexDiskCancellableRequest
+    {
+        
+        let result = self.metainfo() { metaInfoResult in
+            switch metaInfoResult {
+            case .Failed(let error):
+                if let failure = failureHandler {
+                    failure(error as NSError)
+                }
+            case let .Done(total_space, used_space, trash_size, system_folders):
+                if let done = doneHandler {
+                    
+                    let dict = NSMutableDictionary()
+                    for (itemKey, itemValue) in system_folders {
+                        let objcValue = itemValue.description as NSString
+                        dict.setValue(objcValue, forKey: itemKey)
+                    }
+                    
+                    done(total_space,used_space, trash_size, dict)
+                }
+            }
+        }
+        
+        return YandexDiskCancellableRequest(with: result)
     }
 }

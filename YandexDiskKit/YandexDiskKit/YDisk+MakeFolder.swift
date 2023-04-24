@@ -28,7 +28,7 @@
 import Foundation
 
 extension YandexDisk {
-
+    
     public enum MakeFolderResult {
         case Created(href:String, method:String, templated:Bool)
         case Failed(Error)
@@ -47,24 +47,49 @@ extension YandexDisk {
     ///   `russian https://tech.yandex.ru/disk/api/reference/create-folder-docpage/`_.
     public func makeFolderAtPath(_ path:Path, handler:((MakeFolderResult) -> Void)? = nil) -> Result<MakeFolderResult> {
         let result = Result<MakeFolderResult>(handler: handler)
-
-        var url = "\(baseURL)/v1/disk/resources?path=\(path.toUrlEncodedString)"
-
+        
+        let url = "\(baseURL)/v1/disk/resources?path=\(path.toUrlEncodedString)"
+        
         let error = { result.set(.Failed($0)) }
-
-        session.jsonTaskWithURL(url, method:"PUT", errorHandler: error) {
+        
+        let task = session.jsonTaskWithURL(url, method:"PUT", errorHandler: error) {
             (jsonRoot, response)->Void in
-
+            
             switch response.statusCode {
             case 201:
                 let (href, method, templated) = YandexDisk.hrefMethodTemplatedWithDictionary(jsonRoot);
                 return result.set(.Created(href: href, method: method, templated: templated));
-
+                
             default:
                 return error(NSError(domain: "YDisk", code: response.statusCode, userInfo: ["response":response]))
             }
-        }.resume()
-
+        }
+        result.task = task
+        task.resume()
+        
         return result
     }
+    
+    @objc public func makeFolderAtDiskPath(path: String,
+                                           doneHandler: YandexDiskInProgressHandler,
+                                           failureHandler: YandexDiskErrorHandler) -> YandexDiskCancellableRequest
+    {
+        let fromPath = Path.diskPathWithString(path)
+        
+        let result = self.makeFolderAtPath(fromPath) { makeFolderResult in
+            switch makeFolderResult {
+            case .Failed(let error):
+                if let failure = failureHandler {
+                    failure(error as NSError)
+                }
+            case let .Created(href, method, templated):
+                if let done = doneHandler {
+                    done(href as NSString, method as NSString, templated)
+                }
+            }
+        }
+        
+        return YandexDiskCancellableRequest(with: result)
+    }
+    
 }

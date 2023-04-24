@@ -81,6 +81,18 @@ import Foundation
     @objc public var transferSessionIdentifier: String?
     @objc public var transferSessionDelegate: URLSessionDownloadDelegate?
     @objc public var transferSessionQueue : OperationQueue?
+    
+    public typealias YandexDiskProgressHandler = ((_ current: Int64, _ total: Int64) -> Void)?
+    public typealias YandexDiskURLHandler = ((_ url: NSURL?) -> Void)?
+    public typealias YandexDiskDictionaryHandler = ((_ dictionary: NSDictionary?) -> Void)?
+    public typealias YandexDiskArrayHandler = ((_ array: NSArray?) -> Void)?
+    public typealias YandexDiskErrorHandler = ((_ error: NSError?) -> Void)?
+    public typealias YandexDiskVoidHandler = (() -> Void)?
+    public typealias YandexDiskInProgressHandler = ((_ href:NSString, _ method:NSString, _ templated:Bool) -> Void)?
+    public typealias YandexDiskMetaInfoHandler = ((_ total_space:Int, _ used_space:Int, _ trash_size:Int, _ system_folders:NSDictionary) -> Void)?
+    public typealias YandexDiskListingHandler = ((_ dir:NSDictionary?, _ limit:Int, _ offset:Int, _ total:Int, _ path:NSString?, _ sort:NSString?, _ items:NSArray? ) -> Void)?
+    public typealias YandexDiskPublicResourcesListingHandler = ((_ items:NSArray?, _ type:NSString?, _ limit:Int, _ offset:Int) -> Void)?
+    public typealias YandexDiskStringHandler = ((_ href:NSString) -> Void)?
 
     @objc public init(token:String) {
         self.token = token

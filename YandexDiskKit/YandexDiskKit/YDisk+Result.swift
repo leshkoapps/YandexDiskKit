@@ -30,6 +30,8 @@ import Foundation
 public class Result<T> {
 
     var condition = NSCondition()
+    
+    var task : URLSessionTask? = nil
 
     var result: T? {
         willSet {
@@ -68,5 +70,9 @@ public class Result<T> {
     init(handler: ((T) -> Void)? = nil) {
         self.result = nil
         self.onResult = handler
+    }
+    
+    public func cancel() {
+        self.task?.cancel()
     }
 }

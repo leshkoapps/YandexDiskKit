@@ -82,7 +82,7 @@ extension YandexDisk {
         var properties = properties;
         let result = Result<PatchCustomPropertiesResult>(handler: handler)
 
-        var url = "\(baseURL)/v1/disk/resources?path=\(path.toUrlEncodedString)"
+        let url = "\(baseURL)/v1/disk/resources?path=\(path.toUrlEncodedString)"
 
         let error = { result.set(.Failed($0)) }
 
@@ -91,7 +91,7 @@ extension YandexDisk {
         }
         do {
             let data = try JSONSerialization.data(withJSONObject: properties, options: [.prettyPrinted]);
-            session.jsonTaskWithURL(url, method: "PATCH", body: data, errorHandler: error) {
+            let task = session.jsonTaskWithURL(url, method: "PATCH", body: data, errorHandler: error) {
                 (jsonRoot, response)->Void in
 
                 let (href, method, templated) = YandexDisk.hrefMethodTemplatedWithDictionary(jsonRoot)
@@ -105,7 +105,9 @@ extension YandexDisk {
                 default:
                     return error(NSError(domain: "YDisk", code: response.statusCode, userInfo: ["response":response, "json":jsonRoot]))
                 }
-            }.resume()
+            }
+            result.task = task
+            task.resume()
 
             return result
         }

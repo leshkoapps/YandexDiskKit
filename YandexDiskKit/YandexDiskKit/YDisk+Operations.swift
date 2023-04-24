@@ -28,12 +28,12 @@
 import Foundation
 
 extension YandexDisk {
-
+    
     public enum OperationsResult {
         case Status(String)
         case Failed(Error)
     }
-
+    
     /// Operation status.
     ///
     /// :param: opId        Operation Id for which the status should be checked.
@@ -49,7 +49,7 @@ extension YandexDisk {
         var requestUrl = "\(baseURL)/v1/disk/operations/\(opId)"
         return operationStatusWithHref(requestUrl, handler: handler)
     }
-
+    
     /// Operation status.
     ///
     /// :param: href        HREF as provided in .InProcess() responses.
@@ -63,12 +63,12 @@ extension YandexDisk {
     ///   `russian https://tech.yandex.ru/disk/api/reference/operations-docpage/`_.
     public func operationStatusWithHref(_ href:String, handler:((OperationsResult) -> Void)? = nil) -> Result<OperationsResult> {
         let result = Result<OperationsResult>(handler: handler)
-
+        
         let error = { result.set(.Failed($0)) }
-
-        session.jsonTaskWithURL(href, errorHandler: error) {
+        
+        let task = session.jsonTaskWithURL(href, errorHandler: error) {
             (jsonRoot, response)->Void in
-
+            
             switch response.statusCode {
             case 200:
                 if let str = jsonRoot["status"] as? String {
@@ -79,8 +79,30 @@ extension YandexDisk {
             default:
                 return error(NSError(domain: "YDisk", code: response.statusCode, userInfo: ["response":response]))
             }
-        }.resume()
-
+        }
+        result.task = task
+        task.resume()
+        
         return result
+    }
+    
+    @objc public func operationStatusWithHref(_ href: String,
+                                              doneHandler: YandexDiskStringHandler,
+                                              failureHandler: YandexDiskErrorHandler) -> YandexDiskCancellableRequest
+    {
+        let result = self.operationStatusWithHref(href) { statusResult in
+            switch statusResult {
+            case .Failed(let error):
+                if let failure = failureHandler {
+                    failure(error as NSError)
+                }
+            case .Status(let status):
+                if let done = doneHandler {
+                    done(status as NSString)
+                }
+            }
+        }
+        
+        return YandexDiskCancellableRequest(with: result)
     }
 }

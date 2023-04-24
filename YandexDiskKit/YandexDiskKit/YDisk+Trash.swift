@@ -65,7 +65,7 @@ extension YandexDisk {
 
         let error = { result.set(.Failed($0)) }
 
-        session.jsonTaskWithURL(url, method:"PUT", errorHandler: error) {
+        let task = session.jsonTaskWithURL(url, method:"PUT", errorHandler: error) {
             (jsonRoot, response)->Void in
 
             let (href, method, templated) = YandexDisk.hrefMethodTemplatedWithDictionary(jsonRoot)
@@ -80,7 +80,9 @@ extension YandexDisk {
             default:
                 return error(NSError(domain: "YDisk", code: response.statusCode, userInfo: ["response":response]))
             }
-        }.resume()
+        }
+        result.task = task
+        task.resume()
 
         return result
     }

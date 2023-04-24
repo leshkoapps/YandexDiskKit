@@ -28,13 +28,13 @@
 import Foundation
 
 extension YandexDisk {
-
+    
     public enum UploadResult {
         case Done
         case InProcess(href:String, method:String, templated:Bool)
         case Failed(Error)
     }
-
+    
     /// Uploads a file to Yandex Disk.
     ///
     /// Uploads the file at sourceURL to Yandex Disk. This should either be a file URL, in which
@@ -54,51 +54,86 @@ extension YandexDisk {
     ///   and `https://tech.yandex.ru/disk/api/reference/upload-ext-docpage/`_
     public func uploadURL(_ sourceURL:URL, toPath path:Path, overwrite:Bool?=nil, handler:((UploadResult) -> Void)? = nil) -> Result<UploadResult> {
         let result = Result<UploadResult>(handler: handler)
-
+        
         var url = "\(baseURL)/v1/disk/resources/upload?path=\(path.toUrlEncodedString)"
-
+        
         assert(sourceURL.isFileURL || overwrite == nil, "Current version of the API supports 'overwrite' only for file uploads.")
         url.appendOptionalURLParameter("overwrite", value:overwrite)
-
+        
         let error = { result.set(.Failed($0)) }
-
+        
         if sourceURL.isFileURL {
-            session.jsonTaskWithURL(url, errorHandler: error) {
+            let task = session.jsonTaskWithURL(url, errorHandler: error) {
                 (jsonRoot, response)->Void in
-
-                let (href, method, templated) = YandexDisk.hrefMethodTemplatedWithDictionary(jsonRoot)
-
+                
+                let (href, method, _) = YandexDisk.hrefMethodTemplatedWithDictionary(jsonRoot)
+                
                 let url = URL(string: href);
                 var request = URLRequest(url: url!);
                 request.httpMethod = method
-
-                self.transferSession.uploadTask(with: request, fromFile: sourceURL) {
+                
+                let task = self.transferSession.uploadTask(with: request, fromFile: sourceURL) {
                     (data, resopnse, trasferError)->Void in
-
+                    
                     if trasferError != nil {
                         return error(trasferError!)
                     }
                     return result.set(.Done)
-                }.resume()
-            }.resume()
+                }
+                result.task = task
+                task.resume()
+            }
+            result.task = task
+            task.resume()
         } else {
             url += "&url=\(sourceURL.description.urlEncoded())"
-
-            session.jsonTaskWithURL(url, method:"POST", errorHandler: error) {
+            
+            let task = session.jsonTaskWithURL(url, method:"POST", errorHandler: error) {
                 (jsonRoot, response)->Void in
-
+                
                 let (href, method, templated) = YandexDisk.hrefMethodTemplatedWithDictionary(jsonRoot)
-
+                
                 switch response.statusCode {
                 case 202:
                     return result.set(.InProcess(href:href, method:method, templated:templated))
-
+                    
                 default:
                     return error(NSError(domain: "YDisk", code: response.statusCode, userInfo: ["response":response]))
                 }
-            }.resume()
+            }
+            result.task = task
+            task.resume()
         }
-
+        
         return result
+    }
+    
+    @objc public func uploadURL(sourceURL: URL,
+                                toDiskPath: String,
+                                overwrite: Bool,
+                                doneHandler: YandexDiskVoidHandler,
+                                inProcessHandler: YandexDiskInProgressHandler,
+                                failureHandler: YandexDiskErrorHandler) -> YandexDiskCancellableRequest
+    {
+        let toPath = Path.diskPathWithString(toDiskPath)
+        
+        let result = self.uploadURL(sourceURL, toPath:toPath, overwrite:overwrite) { uploadResult in
+            switch uploadResult {
+            case .Failed(let error):
+                if let failure = failureHandler {
+                    failure(error as NSError)
+                }
+            case .Done:
+                if let done = doneHandler {
+                    done()
+                }
+            case let .InProcess(href, method, templated):
+                if let inProgress = inProcessHandler {
+                    inProgress(href as NSString, method as NSString, templated)
+                }
+            }
+        }
+        
+        return YandexDiskCancellableRequest(with: result)
     }
 }

@@ -28,12 +28,12 @@
 import Foundation
 
 extension YandexDisk {
-
+    
     public enum PublicResourceListingResult {
         case Listing(items:[YandexDiskResource], type:YandexDiskResourceType?, limit:Int?, offset:Int? )
         case Failed(Error)
     }
-
+    
     /// List metainfo for public file or folder.
     ///
     /// :param: limit           Optional. The number of recently uploaded files that should be described in the response (for example, for paginated output).
@@ -49,20 +49,20 @@ extension YandexDisk {
     ///   `russian https://tech.yandex.ru/disk/api/reference/meta-docpage/`_.
     public func listPublicResources(_ limit:Int?=nil, offset:Int?=nil, type:YandexDiskResourceType?=nil, preview_size:PreviewSize?=nil, preview_crop:Bool?=nil, handler:((PublicResourceListingResult) -> Void)? = nil) -> Result<PublicResourceListingResult> {
         let result = Result<PublicResourceListingResult>(handler: handler)
-
+        
         var url = "\(baseURL)/v1/disk/resources/public"
-
+        
         url.appendOptionalURLParameter("limit", value:limit)
         url.appendOptionalURLParameter("offset", value:offset)
         url.appendOptionalURLParameter("type", value:type)
         url.appendOptionalURLParameter("preview_size", value:preview_size)
         url.appendOptionalURLParameter("preview_crop", value:preview_crop)
-
+        
         let error = { result.set(.Failed($0)) }
-
-        session.jsonTaskWithURL(url, errorHandler: error) {
+        
+        let task = session.jsonTaskWithURL(url, errorHandler: error) {
             (jsonRoot, response)->Void in
-
+            
             switch response.statusCode {
             case 200:
                 if let items = SimpleResource.resourcesFromArray(jsonRoot["items"] as? NSArray)
@@ -75,17 +75,46 @@ extension YandexDisk {
                     } else {
                         type = nil
                     }
-
+                    
                     return result.set(.Listing(items: items, type: type, limit: limit, offset: offset))
                 } else {
                     return error(NSError(domain: "YDisk", code: response.statusCode, userInfo:
-                        ["message":"incomplete JSON response", "json":jsonRoot]))
+                                            ["message":"incomplete JSON response", "json":jsonRoot]))
                 }
             default:
                 return error(NSError(domain: "YDisk", code: response.statusCode, userInfo: ["response":response]))
             }
-        }.resume()
-
+        }
+        result.task = task
+        task.resume()
+        
         return result
     }
+    
+    @objc public func listPublicResources(limit: Int,
+                                          offset: Int,
+                                          listingHandler: YandexDiskPublicResourcesListingHandler,
+                                          failureHandler: YandexDiskErrorHandler) -> YandexDiskCancellableRequest
+    {
+        let result = self.listPublicResources(limit, offset:offset, type:nil, preview_size:nil, preview_crop:nil) { listing in
+            switch listing {
+            case .Failed(let error):
+                if let failure = failureHandler {
+                    failure(error as NSError)
+                }
+            case let .Listing(items, type, limit, offset):
+                if let listingResultHandler = listingHandler {
+                    let array = NSMutableArray()
+                    for item in items {
+                        let representation = YandexDisk.propertyNamesAndValues(forObject: item) as NSDictionary
+                        array.add(representation)
+                    }
+                    listingResultHandler(array, type?.description as NSString?, limit ?? 0, offset ?? 0)
+                }
+            }
+        }
+        
+        return YandexDiskCancellableRequest(with: result)
+    }
+    
 }

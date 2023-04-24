@@ -28,7 +28,7 @@
 import Foundation
 
 extension YandexDisk {
-
+    
     /// List metainfo for public file or folder.
     ///
     /// :param: key             Key to a public resource, or the public link to a resource.
@@ -47,16 +47,32 @@ extension YandexDisk {
     ///   `english http://api.yandex.com/disk/api/reference/public.xml`_,
     ///   `russian https://tech.yandex.ru/disk/api/reference/public-docpage/`_.
     public func listPublic(key public_key:String, path:String?=nil, sort:SortKey?=nil, limit:Int?=nil, offset:Int?=nil, preview_size:PreviewSize?=nil, preview_crop:Bool?=nil, handler:((ListingResult) -> Void)? = nil) -> Result<ListingResult> {
-
+        
         var url = "\(baseURL)/v1/disk/public/resources?public_key=\(public_key.urlEncoded())"
-
+        
         url.appendOptionalURLParameter("path", value:path)
         url.appendOptionalURLParameter("sort", value:sort)
         url.appendOptionalURLParameter("limit", value:limit)
         url.appendOptionalURLParameter("offset", value:offset)
         url.appendOptionalURLParameter("preview_size", value:preview_size)
         url.appendOptionalURLParameter("preview_crop", value:preview_crop)
-
+        
         return _listURL(url, handler: handler)
     }
+    
+    @objc public func listPublic(key: String,
+                                 path:String?=nil,
+                                 limit: Int,
+                                 offset: Int,
+                                 fileHandler: YandexDiskDictionaryHandler,
+                                 listingHandler: YandexDiskListingHandler,
+                                 failureHandler: YandexDiskErrorHandler) -> YandexDiskCancellableRequest
+    {
+        let result = self.listPublic(key:key, path:path, sort:nil, limit:limit, offset:offset, preview_size:nil, preview_crop:nil) { ListingResult in
+            self.listHandler(listing: ListingResult, fileHandler: fileHandler, listingHandler: listingHandler, failureHandler: failureHandler)
+        }
+        
+        return YandexDiskCancellableRequest(with: result)
+    }
+    
 }

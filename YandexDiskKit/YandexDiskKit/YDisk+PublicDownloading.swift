@@ -28,7 +28,7 @@
 import Foundation
 
 extension YandexDisk {
-
+    
     /// Downloads a public resource.
     ///
     /// :param: key         Public key for a stored resource.
@@ -41,12 +41,34 @@ extension YandexDisk {
     ///   `english http://api.yandex.com/disk/api/reference/public.xml`_,
     ///   `russian https://tech.yandex.ru/disk/api/reference/public-docpage/`_.
     public func downloadPublic(key public_key:String, path:String?=nil, toURL:URL, handler:((DownloadResult) -> Void)? = nil) -> Result<DownloadResult> {
-
+        
         var url = "\(baseURL)/v1/disk/public-resources/download/?public_key=\(public_key.urlEncoded())"
-
+        
         url.appendOptionalURLParameter("path", value:path)
-
+        
         return _downloadURL(url, toURL: toURL, handler: handler)
+    }
+    
+    @objc public func downloadPublic(key: String,
+                                     path: String?=nil,
+                                     toURL: URL,
+                                     doneHandler: YandexDiskVoidHandler,
+                                     failureHandler: YandexDiskErrorHandler) -> YandexDiskCancellableRequest
+    {
+        let result = self.downloadPublic(key:key, path:nil, toURL: toURL) { downloadResult in
+            switch downloadResult {
+            case .Failed(let error):
+                if let failure = failureHandler {
+                    failure(error as NSError)
+                }
+            case .Done:
+                if let done = doneHandler {
+                    done()
+                }
+            }
+        }
+        
+        return YandexDiskCancellableRequest(with: result)
     }
     
 }

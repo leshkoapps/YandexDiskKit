@@ -28,12 +28,12 @@
 import Foundation
 
 extension YandexDisk {
-
+    
     public enum DownloadResult {
         case Done
         case Failed(Error)
     }
-
+    
     /// Downloads a resource from Yandex Disk.
     ///
     /// :param: path        Path to the resource which should be downloaded from Yandex Disk.
@@ -48,27 +48,27 @@ extension YandexDisk {
         let url = "\(baseURL)/v1/disk/resources/download?path=\(path.toUrlEncodedString)"
         return _downloadURL(url, toURL: toURL, handler: handler)
     }
-
+    
     func _downloadURL(_ url:String, toURL:URL, handler:((DownloadResult) -> Void)? = nil) -> Result<DownloadResult> {
         let result = Result<DownloadResult>(handler: handler)
-
+        
         let error = { result.set(.Failed($0)) }
-
-        session.jsonTaskWithURL(url, errorHandler: error) {
+        
+        let task = session.jsonTaskWithURL(url, errorHandler: error) {
             (jsonRoot, response)->Void in
-
-            let (href, method, templated) = YandexDisk.hrefMethodTemplatedWithDictionary(jsonRoot)
+            
+            let (href, method, _) = YandexDisk.hrefMethodTemplatedWithDictionary(jsonRoot)
             let url = URL(string: href);
             var request = URLRequest(url: url!);
             request.httpMethod = method
-
-            self.transferSession.downloadTask(with: request) {
+            
+            let task = self.transferSession.downloadTask(with: request) {
                 (url, response, trasferError)->Void in
-
+                
                 if trasferError != nil {
                     return error(trasferError!)
                 }
-
+                
                 if let url = url {
                     let fm = FileManager.default;
                     do {
@@ -79,9 +79,36 @@ extension YandexDisk {
                         return error(err)
                     }
                 }
-            }.resume()
-        }.resume()
-
+            }
+            result.task = task
+            task.resume()
+        }
+        result.task = task
+        task.resume()
+        
         return result
+    }
+    
+    @objc public func downloadDiskPath(path: String,
+                                       toURL: URL,
+                                       doneHandler: YandexDiskVoidHandler,
+                                       failureHandler: YandexDiskErrorHandler) -> YandexDiskCancellableRequest
+    {
+        let fromPath = Path.diskPathWithString(path)
+        
+        let result = self.downloadPath(fromPath, toURL: toURL) { downloadResult in
+            switch downloadResult {
+            case .Failed(let error):
+                if let failure = failureHandler {
+                    failure(error as NSError)
+                }
+            case .Done:
+                if let done = doneHandler {
+                    done()
+                }
+            }
+        }
+        
+        return YandexDiskCancellableRequest(with: result)
     }
 }

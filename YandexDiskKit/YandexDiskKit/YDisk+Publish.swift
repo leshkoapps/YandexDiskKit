@@ -46,11 +46,11 @@ extension YandexDisk {
     public func publishPath(_ path:Path, handler:((PublishResult) -> Void)? = nil) -> Result<PublishResult> {
         let result = Result<PublishResult>(handler: handler)
 
-        var url = "\(baseURL)/v1/disk/resources/publish/?path=\(path.toUrlEncodedString)"
+        let url = "\(baseURL)/v1/disk/resources/publish/?path=\(path.toUrlEncodedString)"
 
         let error = { result.set(.Failed($0)) }
 
-        session.jsonTaskWithURL(url, method:"PUT", errorHandler: error) {
+        let task = session.jsonTaskWithURL(url, method:"PUT", errorHandler: error) {
             (jsonRoot, response)->Void in
 
             switch response.statusCode {
@@ -60,7 +60,9 @@ extension YandexDisk {
             default:
                 return error(NSError(domain: "YDisk", code: response.statusCode, userInfo: ["response":response]))
             }
-        }.resume()
+        }
+        result.task = task
+        task.resume()
 
         return result
     }

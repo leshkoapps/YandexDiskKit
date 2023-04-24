@@ -59,7 +59,7 @@ extension YandexDisk {
 
         let error = { result.set(.Failed($0)) }
 
-        session.jsonTaskWithURL(url, method:"POST", errorHandler: error) {
+        let task = session.jsonTaskWithURL(url, method:"POST", errorHandler: error) {
             (jsonRoot, response)->Void in
 
             let (href, method, templated) = YandexDisk.hrefMethodTemplatedWithDictionary(jsonRoot)
@@ -74,8 +74,40 @@ extension YandexDisk {
             default:
                 return error(NSError(domain: "YDisk", code: response.statusCode, userInfo: ["response":response]))
             }
-        }.resume()
+        }
+        result.task = task
+        task.resume()
         
         return result
+    }
+    
+    @objc public func moveDiskPath(from: String,
+                                   to: String,
+                                   overwrite: Bool,
+                                   doneHandler: YandexDiskInProgressHandler,
+                                   inProcessHandler: YandexDiskInProgressHandler,
+                                   failureHandler: YandexDiskErrorHandler) -> YandexDiskCancellableRequest
+    {
+        let fromPath = Path.diskPathWithString(from)
+        let toPath = Path.diskPathWithString(to)
+        
+        let result = self.movePath(toPath, fromPath: fromPath, overwrite: overwrite) { copyResult in
+            switch copyResult {
+            case .Failed(let error):
+                if let failure = failureHandler {
+                    failure(error as NSError)
+                }
+            case let .InProcess(href, method, templated):
+                if let inProgress = inProcessHandler {
+                    inProgress(href as NSString, method as NSString, templated)
+                }
+            case let .Done(href, method, templated):
+                if let done = doneHandler {
+                    done(href as NSString, method as NSString, templated)
+                }
+            }
+        }
+        
+        return YandexDiskCancellableRequest(with: result)
     }
 }

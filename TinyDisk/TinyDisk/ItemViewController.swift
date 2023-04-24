@@ -35,29 +35,10 @@ public class ItemViewController: UIViewController, UITableViewDataSource, UITabl
     @IBOutlet var preview: UIImageView!
     @IBOutlet var tableview: UITableView!
 
-    required public init?(coder aDecoder: NSCoder) {
-        super.init(coder: aDecoder)
-    }
-
-    override init(nibName nibNameOrNil: String?, bundle nibBundleOrNil: Bundle?) {
-        super.init(nibName: nibNameOrNil, bundle: nibBundleOrNil)
-    }
-
-    public convenience init?(disk: YandexDisk, resource: YandexDiskResource) {
-        self.init(nibName: "ItemViewController", bundle: Bundle(for: ItemViewController.self))
-        self.disk = disk
-        self.item = resource
-
-        title = item.name
-    }
-
-    private var bundle : Bundle {
-        return Bundle(for: DirectoryViewController.self)
-    }
-
     override public func viewDidLoad() {
         super.viewDidLoad()
 
+        self.title = self.item.name;
         if item.public_url != nil {
             self.navigationItem.rightBarButtonItem = UIBarButtonItem(barButtonSystemItem: .action, target: self, action: #selector(self.action(_:)))
         }
@@ -65,9 +46,9 @@ public class ItemViewController: UIViewController, UITableViewDataSource, UITabl
         var image : UIImage!
 
         if item.type == .Directory {
-            image = UIImage(named: "Folder_icon", in:self.bundle, compatibleWith:nil)
+            image = UIImage(named: "Folder_icon")
         } else {
-            image = UIImage(named: "File_icon", in:self.bundle, compatibleWith:nil)
+            image = UIImage(named: "File_icon")
         }
 
         DispatchQueue.main.async {
@@ -116,7 +97,11 @@ public class ItemViewController: UIViewController, UITableViewDataSource, UITabl
         present(activityView, animated: true) { }
     }
 
-    // #pragma mark - Table view data source
+}
+
+//MARK: - UITableView
+
+extension ItemViewController {
 
     public func numberOfSectionsInTableView(tableView: UITableView) -> Int {
         return 1
@@ -128,9 +113,7 @@ public class ItemViewController: UIViewController, UITableViewDataSource, UITabl
 
     public func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
 
-        let cellIdentifier = "TinyDiskItemCell"
-
-        let cell = tableView.dequeueReusableCell(withIdentifier: cellIdentifier) ?? UITableViewCell(style: .subtitle, reuseIdentifier: cellIdentifier)
+        let cell = tableView.dequeueReusableCell(withIdentifier: "TinyDiskItemCell", for: indexPath);
 
         var name : String?
         var value : String?

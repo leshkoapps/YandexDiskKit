@@ -3,20 +3,22 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 46;
+	objectVersion = 50;
 	objects = {
 
 /* Begin PBXBuildFile section */
 		0F0551621A25956000E79953 /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 0F0551611A25956000E79953 /* Images.xcassets */; };
-		0F0551651A25956000E79953 /* LaunchScreen.xib in Resources */ = {isa = PBXBuildFile; fileRef = 0F0551631A25956000E79953 /* LaunchScreen.xib */; };
 		0F05517B1A25959800E79953 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0F05517A1A25959800E79953 /* AppDelegate.swift */; };
 		0F0551801A2595B800E79953 /* LoginViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0F05517C1A2595B800E79953 /* LoginViewController.swift */; };
-		0F0551811A2595B800E79953 /* LoginViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 0F05517D1A2595B800E79953 /* LoginViewController.xib */; };
 		0F0551821A2595B800E79953 /* NoFileSelectedViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0F05517E1A2595B800E79953 /* NoFileSelectedViewController.swift */; };
-		0F0551831A2595B800E79953 /* NoFileSelectedViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 0F05517F1A2595B800E79953 /* NoFileSelectedViewController.xib */; };
 		0F05519A1A25969C00E79953 /* DirectoryViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0F0551931A25969C00E79953 /* DirectoryViewController.swift */; };
 		0F05519B1A25969C00E79953 /* ItemViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0F0551941A25969C00E79953 /* ItemViewController.swift */; };
-		0F05519C1A25969C00E79953 /* ItemViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 0F0551951A25969C00E79953 /* ItemViewController.xib */; };
+		BD678A8F29F16DC9009030F9 /* TrashDirectoryViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = BD678A8E29F16DC9009030F9 /* TrashDirectoryViewController.swift */; };
+		BD762FA929EDBD8700132C97 /* Login.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = BD762FA829EDBCFD00132C97 /* Login.storyboard */; };
+		BD762FAB29EDBF1000132C97 /* config.swift in Sources */ = {isa = PBXBuildFile; fileRef = BD762FAA29EDBF1000132C97 /* config.swift */; };
+		BD762FAE29EDF99B00132C97 /* RootDirectoryViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = BD762FAD29EDF99B00132C97 /* RootDirectoryViewController.swift */; };
+		BD8F520729EE6AA300B6FC55 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = BD8F520929EE6AA300B6FC55 /* Main.storyboard */; };
+		BD8F520A29EE6AB000B6FC55 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = BD8F520C29EE6AB000B6FC55 /* LaunchScreen.storyboard */; };
 		BDE310DD29EC435000AEE66D /* YandexDiskKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = BDE310D929EC433F00AEE66D /* YandexDiskKit.framework */; };
 		BDE310DE29EC436A00AEE66D /* YandexDiskKit.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = BDE310D929EC433F00AEE66D /* YandexDiskKit.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 /* End PBXBuildFile section */
@@ -56,15 +58,17 @@
 		0F0551551A25956000E79953 /* TinyDisk.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = TinyDisk.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		0F0551591A25956000E79953 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		0F0551611A25956000E79953 /* Images.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Images.xcassets; sourceTree = "<group>"; };
-		0F0551641A25956000E79953 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = Base; path = Base.lproj/LaunchScreen.xib; sourceTree = "<group>"; };
 		0F05517A1A25959800E79953 /* AppDelegate.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		0F05517C1A2595B800E79953 /* LoginViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LoginViewController.swift; sourceTree = "<group>"; };
-		0F05517D1A2595B800E79953 /* LoginViewController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = LoginViewController.xib; sourceTree = "<group>"; };
 		0F05517E1A2595B800E79953 /* NoFileSelectedViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NoFileSelectedViewController.swift; sourceTree = "<group>"; };
-		0F05517F1A2595B800E79953 /* NoFileSelectedViewController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = NoFileSelectedViewController.xib; sourceTree = "<group>"; };
 		0F0551931A25969C00E79953 /* DirectoryViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DirectoryViewController.swift; sourceTree = "<group>"; };
 		0F0551941A25969C00E79953 /* ItemViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ItemViewController.swift; sourceTree = "<group>"; };
-		0F0551951A25969C00E79953 /* ItemViewController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = ItemViewController.xib; sourceTree = "<group>"; };
+		BD678A8E29F16DC9009030F9 /* TrashDirectoryViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TrashDirectoryViewController.swift; sourceTree = "<group>"; };
+		BD762FA729EDBCFD00132C97 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Login.storyboard; sourceTree = "<group>"; };
+		BD762FAA29EDBF1000132C97 /* config.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = config.swift; sourceTree = "<group>"; };
+		BD762FAD29EDF99B00132C97 /* RootDirectoryViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RootDirectoryViewController.swift; sourceTree = "<group>"; };
+		BD8F520829EE6AA300B6FC55 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
+		BD8F520B29EE6AB000B6FC55 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		BDE310D429EC433F00AEE66D /* YandexDiskKit.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = YandexDiskKit.xcodeproj; path = ../YandexDiskKit/YandexDiskKit.xcodeproj; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -101,35 +105,37 @@
 		0F0551571A25956000E79953 /* TinyDisk */ = {
 			isa = PBXGroup;
 			children = (
+				BD762FAA29EDBF1000132C97 /* config.swift */,
 				0F05517A1A25959800E79953 /* AppDelegate.swift */,
-				0F0551611A25956000E79953 /* Images.xcassets */,
-				0F0551841A2595C900E79953 /* View Controllers */,
-				0F0551581A25956000E79953 /* Supporting Files */,
+				0F0551841A2595C900E79953 /* Storyboards */,
+				0F0551581A25956000E79953 /* Resources */,
 			);
 			path = TinyDisk;
 			sourceTree = "<group>";
 		};
-		0F0551581A25956000E79953 /* Supporting Files */ = {
+		0F0551581A25956000E79953 /* Resources */ = {
 			isa = PBXGroup;
 			children = (
+				0F0551611A25956000E79953 /* Images.xcassets */,
 				0F0551591A25956000E79953 /* Info.plist */,
 			);
-			name = "Supporting Files";
+			name = Resources;
 			sourceTree = "<group>";
 		};
-		0F0551841A2595C900E79953 /* View Controllers */ = {
+		0F0551841A2595C900E79953 /* Storyboards */ = {
 			isa = PBXGroup;
 			children = (
-				0F0551631A25956000E79953 /* LaunchScreen.xib */,
 				0F05517C1A2595B800E79953 /* LoginViewController.swift */,
-				0F05517D1A2595B800E79953 /* LoginViewController.xib */,
-				0F05517E1A2595B800E79953 /* NoFileSelectedViewController.swift */,
-				0F05517F1A2595B800E79953 /* NoFileSelectedViewController.xib */,
+				BD762FAD29EDF99B00132C97 /* RootDirectoryViewController.swift */,
 				0F0551931A25969C00E79953 /* DirectoryViewController.swift */,
 				0F0551941A25969C00E79953 /* ItemViewController.swift */,
-				0F0551951A25969C00E79953 /* ItemViewController.xib */,
+				0F05517E1A2595B800E79953 /* NoFileSelectedViewController.swift */,
+				BD678A8E29F16DC9009030F9 /* TrashDirectoryViewController.swift */,
+				BD8F520929EE6AA300B6FC55 /* Main.storyboard */,
+				BD762FA829EDBCFD00132C97 /* Login.storyboard */,
+				BD8F520C29EE6AB000B6FC55 /* LaunchScreen.storyboard */,
 			);
-			name = "View Controllers";
+			name = Storyboards;
 			sourceTree = "<group>";
 		};
 		BDE310D529EC433F00AEE66D /* Products */ = {
@@ -180,12 +186,11 @@
 				TargetAttributes = {
 					0F0551541A25956000E79953 = {
 						CreatedOnToolsVersion = 6.1;
-						DevelopmentTeam = 2Z797QJNH7;
 					};
 				};
 			};
 			buildConfigurationList = 0F0551501A25956000E79953 /* Build configuration list for PBXProject "TinyDisk" */;
-			compatibilityVersion = "Xcode 3.2";
+			compatibilityVersion = "Xcode 9.3";
 			developmentRegion = English;
 			hasScannedForEncodings = 0;
 			knownRegions = (
@@ -224,11 +229,10 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				0F0551831A2595B800E79953 /* NoFileSelectedViewController.xib in Resources */,
-				0F0551651A25956000E79953 /* LaunchScreen.xib in Resources */,
-				0F05519C1A25969C00E79953 /* ItemViewController.xib in Resources */,
+				BD762FA929EDBD8700132C97 /* Login.storyboard in Resources */,
+				BD8F520A29EE6AB000B6FC55 /* LaunchScreen.storyboard in Resources */,
+				BD8F520729EE6AA300B6FC55 /* Main.storyboard in Resources */,
 				0F0551621A25956000E79953 /* Images.xcassets in Resources */,
-				0F0551811A2595B800E79953 /* LoginViewController.xib in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -242,8 +246,11 @@
 				0F0551801A2595B800E79953 /* LoginViewController.swift in Sources */,
 				0F05517B1A25959800E79953 /* AppDelegate.swift in Sources */,
 				0F05519A1A25969C00E79953 /* DirectoryViewController.swift in Sources */,
+				BD762FAE29EDF99B00132C97 /* RootDirectoryViewController.swift in Sources */,
+				BD762FAB29EDBF1000132C97 /* config.swift in Sources */,
 				0F0551821A2595B800E79953 /* NoFileSelectedViewController.swift in Sources */,
 				0F05519B1A25969C00E79953 /* ItemViewController.swift in Sources */,
+				BD678A8F29F16DC9009030F9 /* TrashDirectoryViewController.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -258,12 +265,28 @@
 /* End PBXTargetDependency section */
 
 /* Begin PBXVariantGroup section */
-		0F0551631A25956000E79953 /* LaunchScreen.xib */ = {
+		BD762FA829EDBCFD00132C97 /* Login.storyboard */ = {
 			isa = PBXVariantGroup;
 			children = (
-				0F0551641A25956000E79953 /* Base */,
+				BD762FA729EDBCFD00132C97 /* Base */,
 			);
-			name = LaunchScreen.xib;
+			name = Login.storyboard;
+			sourceTree = "<group>";
+		};
+		BD8F520929EE6AA300B6FC55 /* Main.storyboard */ = {
+			isa = PBXVariantGroup;
+			children = (
+				BD8F520829EE6AA300B6FC55 /* Base */,
+			);
+			name = Main.storyboard;
+			sourceTree = "<group>";
+		};
+		BD8F520C29EE6AB000B6FC55 /* LaunchScreen.storyboard */ = {
+			isa = PBXVariantGroup;
+			children = (
+				BD8F520B29EE6AB000B6FC55 /* Base */,
+			);
+			name = LaunchScreen.storyboard;
 			sourceTree = "<group>";
 		};
 /* End PBXVariantGroup section */
@@ -360,7 +383,10 @@
 				DEVELOPMENT_TEAM = 2Z797QJNH7;
 				FRAMEWORK_SEARCH_PATHS = "$(inherited)";
 				INFOPLIST_FILE = TinyDisk/Info.plist;
-				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 			};
@@ -375,7 +401,10 @@
 				DEVELOPMENT_TEAM = 2Z797QJNH7;
 				FRAMEWORK_SEARCH_PATHS = "$(inherited)";
 				INFOPLIST_FILE = TinyDisk/Info.plist;
-				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
 			name = Release;

@@ -3,7 +3,7 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 46;
+	objectVersion = 50;
 	objects = {
 
 /* Begin PBXBuildFile section */
@@ -37,8 +37,8 @@
 		0FD8FDC31A94926200681A6D /* YDisk+PreviewSize.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0FD8FDC21A94926200681A6D /* YDisk+PreviewSize.swift */; };
 		0FD8FDC41A9492CB00681A6D /* YDisk+ListPublicResources.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0F95A0D91A8F7F6500C902B2 /* YDisk+ListPublicResources.swift */; };
 		0FD8FDC61A9685DB00681A6D /* YDisk+CustomProperties.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0FD8FDC51A9685DB00681A6D /* YDisk+CustomProperties.swift */; };
-		AC062BCB29F6B84F001DD621 /* YDisk+Utils.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC062BCA29F6B84F001DD621 /* YDisk+Utils.swift */; };
-		AC062BCD29F6B8BA001DD621 /* YDisk+Request.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC062BCC29F6B8BA001DD621 /* YDisk+Request.swift */; };
+		ACE70B5529F6BDA500CD6F01 /* YDisk+Request.swift in Sources */ = {isa = PBXBuildFile; fileRef = ACE70B5329F6BDA500CD6F01 /* YDisk+Request.swift */; };
+		ACE70B5629F6BDA500CD6F01 /* YDisk+Utils.swift in Sources */ = {isa = PBXBuildFile; fileRef = ACE70B5429F6BDA500CD6F01 /* YDisk+Utils.swift */; };
 		BDAE226C29EC979400A4E981 /* YandexDiskKit.h in Headers */ = {isa = PBXBuildFile; fileRef = 0F0551AE1A25980200E79953 /* YandexDiskKit.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		BDAE226F29EC97FB00A4E981 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = BDAE226E29EC97FB00A4E981 /* Foundation.framework */; };
 /* End PBXBuildFile section */
@@ -77,8 +77,8 @@
 		0F95A0DB1A8F8A9700C902B2 /* YDisk+ListFileResources.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "YDisk+ListFileResources.swift"; sourceTree = "<group>"; };
 		0FD8FDC21A94926200681A6D /* YDisk+PreviewSize.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "YDisk+PreviewSize.swift"; sourceTree = "<group>"; };
 		0FD8FDC51A9685DB00681A6D /* YDisk+CustomProperties.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "YDisk+CustomProperties.swift"; sourceTree = "<group>"; };
-		AC062BCA29F6B84F001DD621 /* YDisk+Utils.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "YDisk+Utils.swift"; sourceTree = "<group>"; };
-		AC062BCC29F6B8BA001DD621 /* YDisk+Request.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "YDisk+Request.swift"; sourceTree = "<group>"; };
+		ACE70B5329F6BDA500CD6F01 /* YDisk+Request.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "YDisk+Request.swift"; sourceTree = "<group>"; };
+		ACE70B5429F6BDA500CD6F01 /* YDisk+Utils.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "YDisk+Utils.swift"; sourceTree = "<group>"; };
 		BDAE226E29EC97FB00A4E981 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = Platforms/MacOSX.platform/Developer/SDKs/MacOSX13.3.sdk/System/Library/Frameworks/Foundation.framework; sourceTree = DEVELOPER_DIR; };
 /* End PBXFileReference section */
 
@@ -145,14 +145,14 @@
 		0F0551F51A2598A500E79953 /* Helpers */ = {
 			isa = PBXGroup;
 			children = (
+				ACE70B5329F6BDA500CD6F01 /* YDisk+Request.swift */,
+				ACE70B5429F6BDA500CD6F01 /* YDisk+Utils.swift */,
 				0F0551F61A2598C000E79953 /* YDisk+JSONParsingHelpers.swift */,
 				0F0552061A2598F400E79953 /* YDisk+Path.swift */,
 				0F0551F71A2598C000E79953 /* YDisk+Resource.swift */,
 				0F2BBE0A1A8BCAF40033FFAF /* YDisk+Result.swift */,
 				0FD8FDC21A94926200681A6D /* YDisk+PreviewSize.swift */,
 				0F16AC261A9B4BF00067E55E /* YDisk+SortKey.swift */,
-				AC062BCA29F6B84F001DD621 /* YDisk+Utils.swift */,
-				AC062BCC29F6B8BA001DD621 /* YDisk+Request.swift */,
 			);
 			name = Helpers;
 			sourceTree = "<group>";
@@ -239,7 +239,7 @@
 				};
 			};
 			buildConfigurationList = 0F0551A31A25980200E79953 /* Build configuration list for PBXProject "YandexDiskKit" */;
-			compatibilityVersion = "Xcode 3.2";
+			compatibilityVersion = "Xcode 9.3";
 			developmentRegion = English;
 			hasScannedForEncodings = 0;
 			knownRegions = (
@@ -276,8 +276,6 @@
 				0F16AC271A9B4BF00067E55E /* YDisk+SortKey.swift in Sources */,
 				0F0551F11A25989B00E79953 /* NSURLSession+YDisk.swift in Sources */,
 				0FD8FDC41A9492CB00681A6D /* YDisk+ListPublicResources.swift in Sources */,
-				AC062BCB29F6B84F001DD621 /* YDisk+Utils.swift in Sources */,
-				AC062BCD29F6B8BA001DD621 /* YDisk+Request.swift in Sources */,
 				0F05522D1A2598F400E79953 /* YDisk+Unpublish.swift in Sources */,
 				0F0552271A2598F400E79953 /* YDisk+PublicSave.swift in Sources */,
 				0F05521F1A2598F400E79953 /* YDisk+Operations.swift in Sources */,
@@ -285,11 +283,13 @@
 				0F0552311A2598F400E79953 /* YDisk+Version.swift in Sources */,
 				0F0552191A2598F400E79953 /* YDisk+MakeFolder.swift in Sources */,
 				0F0552291A2598F400E79953 /* YDisk+Publish.swift in Sources */,
+				ACE70B5629F6BDA500CD6F01 /* YDisk+Utils.swift in Sources */,
 				0F0551F81A2598C000E79953 /* YDisk+JSONParsingHelpers.swift in Sources */,
 				0FD8FDC61A9685DB00681A6D /* YDisk+CustomProperties.swift in Sources */,
 				0F05522F1A2598F400E79953 /* YDisk+Uploading.swift in Sources */,
 				0F0551F31A25989B00E79953 /* String+YDisk.swift in Sources */,
 				0F0551EF1A25989B00E79953 /* NSDateFormatter+ISO8601.swift in Sources */,
+				ACE70B5529F6BDA500CD6F01 /* YDisk+Request.swift in Sources */,
 				0F05521B1A2598F400E79953 /* YDisk+Metainfo.swift in Sources */,
 				0F0552151A2598F400E79953 /* YDisk+LastUploaded.swift in Sources */,
 				0F0552111A2598F400E79953 /* YDisk+Deleting.swift in Sources */,
@@ -407,7 +407,11 @@
 				DYLIB_INSTALL_NAME_BASE = "@rpath";
 				INFOPLIST_FILE = YandexDiskKit/Info.plist;
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
-				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = NO;
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator macosx";
@@ -427,7 +431,11 @@
 				DYLIB_INSTALL_NAME_BASE = "@rpath";
 				INFOPLIST_FILE = YandexDiskKit/Info.plist;
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
-				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = NO;
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator macosx";

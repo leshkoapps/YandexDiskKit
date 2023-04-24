@@ -29,26 +29,14 @@ import UIKit
 
 class LoginViewController: UIViewController {
 
-    var clientId = ""
-
-    required init?(coder aDecoder: NSCoder) {
-        super.init(coder: aDecoder)
+    override func viewDidLoad() {
+        super.viewDidLoad();
     }
 
-    override init(nibName nibNameOrNil: String?, bundle nibBundleOrNil: Bundle?) {
-        super.init(nibName: nibNameOrNil, bundle: nibBundleOrNil)
-    }
-
-    internal convenience init(clientId: String) {
-        self.init(nibName: "LoginViewController", bundle: Bundle(for: LoginViewController.self))
-        title = "Login"
-        self.clientId = clientId
-    }
-
-    @IBAction func doLogin(_ sender: UIButton) {
+    @IBAction func loginClick(_ sender: UIButton) {
         let response_type = "token"
 
-        let urlstr = "https://oauth.yandex.ru/authorize?response_type=\(response_type)&client_id=\(clientId)"
+        let urlstr = "https://oauth.yandex.ru/authorize?response_type=\(response_type)&client_id=\(CONF_CLIENTID)"
 
         if let url = URL(string: urlstr) {
             UIApplication.shared.open(url, completionHandler: nil);

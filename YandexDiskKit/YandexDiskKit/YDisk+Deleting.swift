@@ -101,7 +101,7 @@ extension YandexDisk {
         return result
     }
     
-    @objc public func deleteDiskPath(path: String,
+    @objc public func deleteDiskPath(_ path: String,
                                      permanently: Bool,
                                      doneHandler: YandexDiskVoidHandler,
                                      inProcessHandler: YandexDiskInProgressHandler,

@@ -44,46 +44,48 @@ import Foundation
     @objc public let baseURL = "https://cloud-api.yandex.net:443"
 
     /// MARK: - URL Session related
-
-    var additionalHTTPHeaders : [String:String] {
+    @objc public var userAgent: String?
+    @objc public var additionalHTTPHeaders : [String:String] {
         return [
             "Accept"        :   "application/json",
             "Authorization" :   "OAuth \(token)",
-            "User-Agent"    :   "Yandex Disk swift SDK"]
+            "User-Agent"    :   userAgent ?? "Yandex Disk swift SDK"]
     }
 
+    @objc public var sessionDelegate: URLSessionDelegate?
+    @objc public var sessionQueue : OperationQueue?
     @objc public lazy var session : URLSession = {
         let sessionConfig = URLSessionConfiguration.default
         sessionConfig.httpAdditionalHeaders = self.additionalHTTPHeaders
         sessionConfig.httpShouldUsePipelining = true
 
-        let _session = URLSession(configuration: sessionConfig)
+        let _session = URLSession(configuration: sessionConfig, delegate: self.sessionDelegate, delegateQueue: self.sessionQueue)
         return _session
     }()
 
     private var _transferSession : URLSession?
-    @objc public var transferSession : URLSession {
-        if _transferSession != nil {
-            return _transferSession!
-        } else if transferSessionIdentifier != nil && transferSessionDelegate != nil {
-            let transferSessionConfig = URLSessionConfiguration.background(withIdentifier: transferSessionIdentifier!)
-            transferSessionConfig.httpAdditionalHeaders = additionalHTTPHeaders
-            transferSessionConfig.httpShouldUsePipelining = true
-
-            let queue = transferSessionQueue ?? OperationQueue.main
-            _transferSession = URLSession(configuration: transferSessionConfig, delegate: transferSessionDelegate, delegateQueue: queue)
-            return _transferSession!
-        } else {
-            return session
-        }
-    }
-
     @objc public var transferSessionIdentifier: String?
     @objc public var transferSessionDelegate: URLSessionDownloadDelegate?
     @objc public var transferSessionQueue : OperationQueue?
-    
+    @objc public var transferSession : URLSession {
+        if _transferSession != nil {
+            return _transferSession!
+        } else if self.transferSessionIdentifier != nil && self.transferSessionDelegate != nil {
+            let transferSessionConfig = URLSessionConfiguration.background(withIdentifier: self.transferSessionIdentifier!)
+            transferSessionConfig.httpAdditionalHeaders = self.additionalHTTPHeaders
+            transferSessionConfig.httpShouldUsePipelining = true
+
+            let queue = self.transferSessionQueue ?? OperationQueue.main
+            _transferSession = URLSession(configuration: transferSessionConfig, delegate: self.transferSessionDelegate, delegateQueue: queue)
+            return _transferSession!
+        } else {
+            return self.session
+        }
+    }
+
     public typealias YandexDiskProgressHandler = ((_ current: Int64, _ total: Int64) -> Void)?
     public typealias YandexDiskURLHandler = ((_ url: NSURL?) -> Void)?
+    public typealias YandexDiskURLRequestHandler = ((_ urlRequest: NSURLRequest?) -> Void)?
     public typealias YandexDiskDictionaryHandler = ((_ dictionary: NSDictionary?) -> Void)?
     public typealias YandexDiskArrayHandler = ((_ array: NSArray?) -> Void)?
     public typealias YandexDiskErrorHandler = ((_ error: NSError?) -> Void)?

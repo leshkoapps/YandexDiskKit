@@ -34,6 +34,11 @@ extension YandexDisk {
         case Failed(Error)
     }
     
+    public enum DownloadRequestResult {
+        case Done(URLRequest)
+        case Failed(Error)
+    }
+    
     /// Downloads a resource from Yandex Disk.
     ///
     /// :param: path        Path to the resource which should be downloaded from Yandex Disk.
@@ -89,7 +94,35 @@ extension YandexDisk {
         return result
     }
     
-    @objc public func downloadDiskPath(path: String,
+    func downloadRequestForPath(_ path:Path, handler:((DownloadRequestResult) -> Void)? = nil) -> Result<DownloadRequestResult> {
+        let url = "\(baseURL)/v1/disk/resources/download?path=\(path.toUrlEncodedString)"
+        let result = Result<DownloadRequestResult>(handler: handler)
+        
+        let error = { result.set(.Failed($0)) }
+        let additionalHTTPHeaders = self.additionalHTTPHeaders
+        
+        let task = session.jsonTaskWithURL(url, errorHandler: error) {
+            (jsonRoot, response)->Void in
+            
+            let (href, method, _) = YandexDisk.hrefMethodTemplatedWithDictionary(jsonRoot)
+            let url = URL(string: href);
+            var request = URLRequest(url: url!);
+            request.httpMethod = method
+            
+            //add authorization header
+            for (key,value) in additionalHTTPHeaders {
+                request.addValue(value, forHTTPHeaderField: key)
+            }
+            
+            result.set(.Done(request))
+        }
+        result.task = task
+        task.resume()
+        
+        return result
+    }
+    
+    @objc public func downloadDiskPath(_ path: String,
                                        toURL: URL,
                                        doneHandler: YandexDiskVoidHandler,
                                        failureHandler: YandexDiskErrorHandler) -> YandexDiskCancellableRequest
@@ -105,6 +138,28 @@ extension YandexDisk {
             case .Done:
                 if let done = doneHandler {
                     done()
+                }
+            }
+        }
+        
+        return YandexDiskCancellableRequest(with: result)
+    }
+    
+    @objc public func downloadRequestForDiskPath(_ path: String,
+                                                 doneHandler: YandexDiskURLRequestHandler,
+                                                 failureHandler: YandexDiskErrorHandler) -> YandexDiskCancellableRequest
+    {
+        let fromPath = Path.diskPathWithString(path)
+        
+        let result = self.downloadRequestForPath(fromPath) { downloadRequestResult in
+            switch downloadRequestResult {
+            case .Failed(let error):
+                if let failure = failureHandler {
+                    failure(error as NSError)
+                }
+            case .Done(let request):
+                if let done = doneHandler {
+                    done(request as NSURLRequest)
                 }
             }
         }

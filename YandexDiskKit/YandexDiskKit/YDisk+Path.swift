@@ -62,10 +62,19 @@ extension YandexDisk {
         case Disk(String)
         case Trash(String)
 
-        private static func stringWithoutTrainingSlash(_ path: String) -> String {
+        private static func stringByDeletingLastPathSlash(_ path: String) -> String {
             if path.hasSuffix("/") {
-                let index = path.index(before: path.endIndex);
-                return String( path[..<index] );
+                let index = path.index(before: path.endIndex)
+                return String( path[..<index] )
+            } else {
+                return path
+            }
+        }
+        
+        private static func stringByDeletingFirstPathSlash(_ path: String) -> String {
+            if path.hasPrefix("/") {
+                let index = path.index(after: path.startIndex)
+                return String( path[index...] )
             } else {
                 return path
             }
@@ -75,9 +84,10 @@ extension YandexDisk {
             var path = path;
             if path.hasPrefix("app:/") {
                 let index = path.index(path.startIndex, offsetBy: 5)
-                path = String( path[index..<path.endIndex] );
+                path = String( path[index..<path.endIndex] )
             }
-            path = stringWithoutTrainingSlash(path)
+            path = stringByDeletingLastPathSlash(path)
+            path = stringByDeletingFirstPathSlash(path)
             return YandexDisk.Path.App(path)
         }
 
@@ -85,9 +95,10 @@ extension YandexDisk {
             var path = path;
             if path.hasPrefix("disk:/") {
                 let index = path.index(path.startIndex, offsetBy: 6)
-                path = String( path[index..<path.endIndex] );
+                path = String( path[index..<path.endIndex] )
             }
-            path = stringWithoutTrainingSlash(path)
+            path = stringByDeletingLastPathSlash(path)
+            path = stringByDeletingFirstPathSlash(path)
             return YandexDisk.Path.Disk(path)
         }
 
@@ -95,9 +106,10 @@ extension YandexDisk {
             var path = path;
             if path.hasPrefix("trash:/") {
                 let index = path.index(path.startIndex, offsetBy: 7)
-                path = String( path[index..<path.endIndex] );
+                path = String( path[index..<path.endIndex] )
             }
-            path = stringWithoutTrainingSlash(path)
+            path = stringByDeletingLastPathSlash(path)
+            path = stringByDeletingFirstPathSlash(path)
             return YandexDisk.Path.Trash(path)
         }
 

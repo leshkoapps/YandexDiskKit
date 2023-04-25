@@ -1,6 +1,6 @@
 Pod::Spec.new do |s|
   s.name                  = 'YandexDiskKit'
-  s.version               = '1.0.0'
+  s.version               = '1.0.1'
   s.summary               = '*Unofficial* Yandex Disk SDK in swift'
   s.homepage              = 'https://github.com/aucl/YandexDiskKit'
   s.license               = 'BSD 2-Clause'

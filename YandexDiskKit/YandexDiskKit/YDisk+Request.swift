@@ -17,11 +17,11 @@ import Foundation
         super.init()
     }
     
-    @objc func cancel() {
+    @objc public func cancel() {
         self.result.task?.cancel()
     }
     
-    @objc func getURLTask() -> URLSessionTask? {
+    @objc public func getURLTask() -> URLSessionTask? {
         return self.result.task
     }
     

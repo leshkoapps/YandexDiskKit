@@ -31,7 +31,7 @@ import CoreData
 public enum YandexDiskResourceType : String, CustomStringConvertible {
     case File = "file"
     case Directory = "dir"
-
+    
     /// Required by protocol Printable
     public var description: String {
         return self.rawValue
@@ -39,7 +39,7 @@ public enum YandexDiskResourceType : String, CustomStringConvertible {
 }
 
 public protocol YandexDiskResource {
-
+    
     var type : YandexDiskResourceType { get }
     var path : YandexDisk.Path { get }
     var name: String { get }
@@ -54,16 +54,22 @@ public protocol YandexDiskResource {
     var public_url: String? { get }
     var origin_path: String? { get }
     var custom_properties: NSDictionary? { get }
-
+    
 }
 
 extension YandexDisk {
     
     @objc public class SimpleResource : NSObject, YandexDiskResource {
-
+        
         public let type : YandexDiskResourceType
+        @objc public var typeString : String {
+            return self.type.description
+        }
         @objc public let name : String
         public let path : YandexDisk.Path
+        @objc public var pathString : String {
+            return self.path.description
+        }
         @objc public let created : Date
         @objc public let modified : Date
         @objc public let size : NSNumber?
@@ -75,16 +81,18 @@ extension YandexDisk {
         @objc public let public_url : String?
         @objc public let origin_path: String?
         @objc public let custom_properties: NSDictionary?
-
+        @objc public let orig_properties: NSDictionary?
+        
         private static let dateformatter = DateFormatter.iso8601dateFormatter()
-
+        
         init(type: YandexDiskResourceType, name: String, path: YandexDisk.Path, created: Date, modified: Date, dictionary props: NSDictionary) {
             self.type = type
             self.name = name
             self.path = path
             self.created = created
             self.modified = modified
-
+            self.orig_properties = props
+            
             // the following properties are optional and can be absent
             size = props["size"] as? NSNumber
             preview = props["preview"] as? String
@@ -96,11 +104,11 @@ extension YandexDisk {
             media_type = props["media_type"] as? String
             custom_properties = props["custom_properties"] as? NSDictionary
         }
-
+        
         class func resourceFromDictionary(_ properties:NSDictionary?) -> YandexDiskResource? {
             // According to API documentationthe following properties are
             // required, so we will fail if they are not existing
-
+            
             if let props = properties,
                let str = props["type"] as? String,
                let type = YandexDiskResourceType(rawValue: str),
@@ -112,16 +120,16 @@ extension YandexDisk {
                 let path = Path.pathWithString(path_str)
                 let created = dateformatter.date(from: created_str) ?? Date(timeIntervalSince1970: 0)
                 let modified = dateformatter.date(from: modified_str) ?? Date(timeIntervalSince1970: 0)
-
+                
                 return SimpleResource(type: type, name: name, path: path, created: created, modified: modified, dictionary: props)
             }
             return nil
         }
-
+        
         class func resourcesFromArray(_ array:NSArray?) -> [YandexDiskResource]? {
-
+            
             var elements: [YandexDiskResource] = []
-
+            
             if let items = array {
                 for item in items {
                     if let element = SimpleResource.resourceFromDictionary(item as? NSDictionary) {
@@ -135,15 +143,15 @@ extension YandexDisk {
             return nil
         }
         
-
+        
         /// Required by protocol Printable
         override public var description: String {
-        if let s = size {
-            return "f \(name) \t\(s) bytes \t\(mime_type ?? String())"
-        } else {
-            return "d \(name)"
+            if let s = size {
+                return "f \(name) \t\(s) bytes \t\(mime_type ?? String())"
+            } else {
+                return "d \(name)"
             }
         }
     }
-
+    
 }

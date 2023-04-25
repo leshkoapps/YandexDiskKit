@@ -84,7 +84,7 @@ extension YandexDisk {
     @objc public func moveDiskPath(from: String,
                                    to: String,
                                    overwrite: Bool,
-                                   doneHandler: YandexDiskInProgressHandler,
+                                   doneHandler: YandexDiskStringHandler,
                                    inProcessHandler: YandexDiskInProgressHandler,
                                    failureHandler: YandexDiskErrorHandler) -> YandexDiskCancellableRequest
     {
@@ -101,9 +101,9 @@ extension YandexDisk {
                 if let inProgress = inProcessHandler {
                     inProgress(href as NSString, method as NSString, templated)
                 }
-            case let .Done(href, method, templated):
+            case let .Done(href, _, _):
                 if let done = doneHandler {
-                    done(href as NSString, method as NSString, templated)
+                    done(href as NSString)
                 }
             }
         }

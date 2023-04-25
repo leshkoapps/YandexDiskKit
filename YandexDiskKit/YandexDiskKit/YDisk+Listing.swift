@@ -152,7 +152,7 @@ extension YandexDisk {
         }
     }
     
-    @objc public func listDiskPath(path: String,
+    @objc public func listDiskPath(_ path: String,
                                    limit: Int,
                                    offset: Int,
                                    fileHandler: YandexDiskDictionaryHandler,

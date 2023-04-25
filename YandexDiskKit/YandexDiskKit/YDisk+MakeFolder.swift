@@ -70,8 +70,8 @@ extension YandexDisk {
         return result
     }
     
-    @objc public func makeFolderAtDiskPath(path: String,
-                                           doneHandler: YandexDiskInProgressHandler,
+    @objc public func makeFolderAtDiskPath(_ path: String,
+                                           doneHandler: YandexDiskStringHandler,
                                            failureHandler: YandexDiskErrorHandler) -> YandexDiskCancellableRequest
     {
         let fromPath = Path.diskPathWithString(path)
@@ -82,9 +82,9 @@ extension YandexDisk {
                 if let failure = failureHandler {
                     failure(error as NSError)
                 }
-            case let .Created(href, method, templated):
+            case let .Created(href, _, _):
                 if let done = doneHandler {
-                    done(href as NSString, method as NSString, templated)
+                    done(href as NSString)
                 }
             }
         }

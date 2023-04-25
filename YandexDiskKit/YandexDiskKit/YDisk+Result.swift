@@ -28,14 +28,25 @@
 import Foundation
 
 @objc protocol URLSessionTaskWrapper {
+    
     var task : URLSessionTask? { get set }
+    
+    var onTaskUpdate: ((URLSessionTask?) -> Void)? { get set }
 }
 
 public class Result<T> : URLSessionTaskWrapper{
 
     var condition = NSCondition()
     
-    var task : URLSessionTask? = nil
+    public var onTaskUpdate: ((URLSessionTask?) -> Void)?
+    
+    var task : URLSessionTask? {
+        willSet {
+            if let handler = onTaskUpdate, let value = newValue {
+                handler(value)
+            }
+        }
+    }
 
     var result: T? {
         willSet {

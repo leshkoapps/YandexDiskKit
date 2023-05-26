@@ -138,7 +138,7 @@ extension YandexDisk {
         }
 
         var toUrlEncodedString : String {
-            return self.stringValue.urlEncoded()
+            return self.stringValue.urlEncodedRFC3986()
         }
 
         /// Required by protocol Printable

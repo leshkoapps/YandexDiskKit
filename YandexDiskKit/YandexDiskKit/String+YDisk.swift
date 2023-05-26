@@ -34,6 +34,12 @@ extension String {
         let allowedCharacters = CharacterSet(charactersIn: charactersToEscape).inverted
         return self.addingPercentEncoding(withAllowedCharacters: allowedCharacters) ?? self
     }
+    
+    func urlEncodedRFC3986() -> String {
+        let urlQueryParameterAllowedCharacterSetRFC3986 : CharacterSet = CharacterSet.init(charactersIn: "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-._~/?")
+        let escapedString = self.addingPercentEncoding(withAllowedCharacters:urlQueryParameterAllowedCharacterSetRFC3986)
+        return escapedString ?? self
+    }
 
     mutating func appendOptionalURLParameter<T>(_ name: String, value: T?) {
         if let value = value {
